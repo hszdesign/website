@@ -951,15 +951,56 @@
   });
 
   // ---------- Form submit ----------
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwKBFHNnHbB5l58j_tyegRopRRJNc42Sye-3_FGuv4AiJmJz6L1azVYO1cWU0xvJAzy2g/exec';
   const form = document.getElementById('briefForm');
   const status = document.getElementById('formStatus');
-  form.addEventListener('submit', e => {
+
+  form.addEventListener('submit', async e => {
     e.preventDefault();
-    status.textContent = '✓ Dzięki! Wracamy z wyceną w ciągu 24h.';
-    status.classList.remove('hidden');
-    status.classList.remove('text-muted');
-    status.classList.add('text-accent', 'font-medium');
-    form.querySelector('button[type="submit"]').disabled = true;
+    const btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Wysyłanie…';
+
+    const body = {
+      action: 'submit_brief',
+      name: form.querySelector('#f-name').value,
+      email: form.querySelector('#f-email').value,
+      phone: form.querySelector('#f-phone').value,
+      description: form.querySelector('#f-desc').value,
+    };
+
+    const file = fileInput.files?.[0];
+    if (file) {
+      const base64 = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = () => res(reader.result.split(',')[1]);
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+      body.file = { name: file.name, base64 };
+    }
+
+    try {
+      const resp = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body),
+        redirect: 'follow',
+      });
+      const data = await resp.json();
+      if (data && data.ok === false) throw new Error(data.error || 'Błąd serwera');
+      status.textContent = '✓ Dzięki! Wracamy z wyceną w ciągu 24h.';
+      status.classList.remove('hidden', 'text-muted', 'text-red-500');
+      status.classList.add('text-accent', 'font-medium');
+      form.reset();
+      dzText.textContent = 'Przeciągnij plik lub kliknij aby wybrać';
+    } catch (err) {
+      btn.disabled = false;
+      btn.innerHTML = 'Wyślij brief <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>';
+      status.textContent = '✗ Coś poszło nie tak — spróbuj ponownie lub napisz na hello@hsz.design';
+      status.classList.remove('hidden', 'text-accent', 'font-medium');
+      status.classList.add('text-red-500');
+    }
   });
 
   // ---------- Reveal on scroll ----------
