@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Instrukcja – HSZ Admin</title>
+<link rel="icon" type="image/png" href="../assets/hsz-logo.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg:'#FAFAFA', surface:'#FFFFFF', ink:'#0A0A0A',
+          muted:'#737373', border:'#E5E5E5',
+          accent:'#0A0A0A',
+        },
+        fontFamily: {
+          display:['"Space Grotesk"','sans-serif'],
+          sans:['Inter','sans-serif'],
+          mono:['"JetBrains Mono"','monospace'],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family:'Inter',sans-serif; background:#FAFAFA; color:#0A0A0A; -webkit-font-smoothing:antialiased; }
+  .mono-label { font-family:'JetBrains Mono',monospace; letter-spacing:.18em; text-transform:uppercase; font-size:12px; font-weight:500; }
+  .section-eyebrow { display:inline-flex; align-items:center; gap:.5rem; font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:#0A0A0A; font-weight:500; }
+  .section-eyebrow::before { content:""; display:inline-block; width:24px; height:1px; background:#0A0A0A; }
+  .step-num { font-family:'JetBrains Mono',monospace; font-size:32px; font-weight:600; line-height:1; color:#0A0A0A; }
+  .pill { display:inline-flex; align-items:center; gap:.25rem; border-radius:9999px; padding:.2rem .75rem; font-size:11px; font-family:'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase; }
+  .pill-nowy        { background:#EFF6FF; color:#1D4ED8; }
+  .pill-wyceniony   { background:#FFFBEB; color:#B45309; }
+  .pill-w_realizacji{ background:#F5F3FF; color:#6D28D9; }
+  .pill-zrobiony    { background:#ECFDF5; color:#065F46; }
+  .pill-odrzucony   { background:#F5F5F5; color:#525252; }
+  .tip { background:#F0FDF4; border:1px solid #BBF7D0; border-radius:12px; padding:1rem 1.25rem; }
+  .warn { background:#FFFBEB; border:1px solid #FDE68A; border-radius:12px; padding:1rem 1.25rem; }
+  .code { font-family:'JetBrains Mono',monospace; font-size:13px; background:#F5F5F5; border:1px solid #E5E5E5; border-radius:6px; padding:.2rem .5rem; }
+</style>
+</head>
+
+<body class="bg-bg text-ink">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-border">
+  <div class="max-w-3xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+    <a href="index.html" class="flex items-center gap-2 text-[14px] text-muted hover:text-ink transition">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
+      Panel admin
+    </a>
+    <span class="font-display font-bold text-[15px]">Instrukcja</span>
+    <div class="w-24"></div><!-- balans -->
+  </div>
+</header>
+
+<main class="max-w-3xl mx-auto px-5 py-12 md:py-16">
+
+  <!-- INTRO -->
+  <div class="mb-14">
+    <div class="flex items-center gap-4 mb-6">
+      <span class="w-14 h-14 bg-ink flex-shrink-0" style="clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);display:flex;align-items:center;justify-content:center;">
+        <span class="font-display font-extrabold text-white text-[14px] tracking-tight">HSZ</span>
+      </span>
+      <div>
+        <h1 class="font-display font-bold text-[28px] md:text-[36px] leading-tight">Jak korzystać<br/>z panelu</h1>
+      </div>
+    </div>
+    <p class="text-muted text-[17px] leading-[1.7] max-w-xl">
+      Tu znajdziesz wszystko, co potrzebujesz, żeby obsługiwać stronę hszdesign.pl – bez żadnej wiedzy technicznej.
+      Panel działa w przeglądarce, na każdym urządzeniu.
+    </p>
+
+    <!-- quick nav -->
+    <nav class="mt-8 flex flex-wrap gap-3">
+      <a href="#logowanie"   class="inline-flex items-center gap-1.5 text-[13px] font-medium border border-border rounded-full px-4 py-2 hover:bg-ink hover:text-white transition">01 Logowanie</a>
+      <a href="#briefy"      class="inline-flex items-center gap-1.5 text-[13px] font-medium border border-border rounded-full px-4 py-2 hover:bg-ink hover:text-white transition">02 Briefy</a>
+      <a href="#realizacje"  class="inline-flex items-center gap-1.5 text-[13px] font-medium border border-border rounded-full px-4 py-2 hover:bg-ink hover:text-white transition">03 Realizacje</a>
+      <a href="#teksty"      class="inline-flex items-center gap-1.5 text-[13px] font-medium border border-border rounded-full px-4 py-2 hover:bg-ink hover:text-white transition">04 Teksty</a>
+    </nav>
+  </div>
+
+  <hr class="border-border mb-14"/>
+
+  <!-- ===== 01 LOGOWANIE ===== -->
+  <section id="logowanie" class="mb-16">
+    <div class="section-eyebrow mb-4">Logowanie</div>
+    <h2 class="font-display font-bold text-[26px] md:text-[32px] mb-8">Jak się zalogować</h2>
+
+    <ol class="space-y-6">
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">1</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Otwórz adres panelu w przeglądarce</p>
+          <p class="text-muted text-[15px]">Przejdź na <span class="code">hszdesign.pl/admin</span> lub kliknij link z zakładki „Admin" w stopce strony.</p>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">2</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Kliknij przycisk „Zaloguj się przez Google"</p>
+          <p class="text-muted text-[15px]">Pojawi się okienko Google – wybierz konto <span class="code">dominik@hszdesign.pl</span>.</p>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">3</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Gotowe – panel otwiera się automatycznie</p>
+          <p class="text-muted text-[15px]">Nie musisz nic więcej robić. Sesja trzyma się do momentu zamknięcia karty lub kliknięcia „Wyloguj".</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="tip mt-6">
+      <p class="text-[14px] leading-[1.6]"><strong>Wskazówka:</strong> Panel działa tylko z konta, które zostało dodane do listy adminów. Inne konta Google zobaczą komunikat o braku dostępu.</p>
+    </div>
+  </section>
+
+  <hr class="border-border mb-14"/>
+
+  <!-- ===== 02 BRIEFY ===== -->
+  <section id="briefy" class="mb-16">
+    <div class="section-eyebrow mb-4">Briefy</div>
+    <h2 class="font-display font-bold text-[26px] md:text-[32px] mb-3">Briefy klientów</h2>
+    <p class="text-muted text-[16px] leading-[1.7] mb-8">Kiedy ktoś wypełnia formularz na stronie hszdesign.pl, jego wiadomość trafia tutaj jako <strong>brief</strong>. Liczba w nawiasie przy zakładce „Briefy" to ilość nowych, nieprzejrzanych zleceń.</p>
+
+    <h3 class="font-display font-semibold text-[18px] mb-4">Jak obsługiwać brief</h3>
+    <ol class="space-y-6 mb-8">
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">1</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Kliknij na wiersz z briefem, żeby go rozwinąć</p>
+          <p class="text-muted text-[15px]">Zobaczysz dane klienta, opis projektu i ewentualny plik 3D do pobrania.</p>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">2</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Pobierz plik 3D (jeśli jest)</p>
+          <p class="text-muted text-[15px]">Kliknij link przy „Plik 3D" – otworzy się plik w Google Drive.</p>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">3</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Zmień status i dodaj notatkę</p>
+          <p class="text-muted text-[15px]">Wybierz nowy status z listy, a w polu „Notatka wewnętrzna" wpisz np. zaproponowaną cenę, termin, uwagi. To pole widzi tylko admin.</p>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">4</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Kliknij „Zapisz"</p>
+          <p class="text-muted text-[15px]">Zmiany trafiają od razu do bazy. W prawym dolnym rogu pojawi się potwierdzenie.</p>
+        </div>
+      </li>
+    </ol>
+
+    <h3 class="font-display font-semibold text-[18px] mb-4">Co oznaczają statusy</h3>
+    <div class="bg-surface border border-border rounded-xl overflow-hidden mb-8">
+      <div class="divide-y divide-border">
+        <div class="px-5 py-4 flex items-center gap-4">
+          <span class="pill pill-nowy w-28 justify-center flex-shrink-0">nowy</span>
+          <p class="text-[14px] text-muted">Nowe zlecenie, jeszcze nieprzejrzane. Pojawia się w liczniku na zakładce.</p>
+        </div>
+        <div class="px-5 py-4 flex items-center gap-4">
+          <span class="pill pill-wyceniony w-28 justify-center flex-shrink-0">wyceniony</span>
+          <p class="text-[14px] text-muted">Wysłałeś klientowi wycenę, czekasz na odpowiedź.</p>
+        </div>
+        <div class="px-5 py-4 flex items-center gap-4">
+          <span class="pill pill-w_realizacji w-28 justify-center flex-shrink-0">w&nbsp;realizacji</span>
+          <p class="text-[14px] text-muted">Klient zaakceptował, druk/praca w toku.</p>
+        </div>
+        <div class="px-5 py-4 flex items-center gap-4">
+          <span class="pill pill-zrobiony w-28 justify-center flex-shrink-0">zrobiony</span>
+          <p class="text-[14px] text-muted">Gotowe i wysłane do klienta.</p>
+        </div>
+        <div class="px-5 py-4 flex items-center gap-4">
+          <span class="pill pill-odrzucony w-28 justify-center flex-shrink-0">odrzucony</span>
+          <p class="text-[14px] text-muted">Nie przyjąłeś zlecenia (np. projekt poza zakresem, klient zrezygnował).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <p class="text-[14px] leading-[1.6]"><strong>Wskazówka:</strong> Użyj filtru „Wszystkie statusy" na górze listy, żeby zobaczyć tylko np. nowe zlecenia albo te w realizacji.</p>
+    </div>
+  </section>
+
+  <hr class="border-border mb-14"/>
+
+  <!-- ===== 03 REALIZACJE ===== -->
+  <section id="realizacje" class="mb-16">
+    <div class="section-eyebrow mb-4">Realizacje</div>
+    <h2 class="font-display font-bold text-[26px] md:text-[32px] mb-3">Portfolio na stronie</h2>
+    <p class="text-muted text-[16px] leading-[1.7] mb-8">Zakładka Realizacje to twoje portfolio – projekty, które wyświetlają się na stronie głównej hszdesign.pl w sekcji „Wybrane projekty". Możesz dodawać, edytować i usuwać pozycje.</p>
+
+    <h3 class="font-display font-semibold text-[18px] mb-4">Jak dodać nową realizację</h3>
+    <ol class="space-y-6 mb-8">
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">1</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Kliknij „+ Nowa realizacja"</p>
+          <p class="text-muted text-[15px]">Otworzy się formularz nad listą projektów.</p>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">2</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Wypełnij pola</p>
+          <p class="text-muted text-[15px]">Obowiązkowy jest tylko <strong>Tytuł</strong> (np. „Lampka hexagonalna"). Materiał i wymiary pojawią się pod zdjęciem na stronie.</p>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">3</span>
+        <div>
+          <p class="font-medium text-[16px] mb-2">Dodaj zdjęcia – przez Google Drive</p>
+          <p class="text-muted text-[15px] mb-3">Zdjęcia wgrywa się jako linki z Google Drive. Oto jak to zrobić:</p>
+          <div class="bg-surface border border-border rounded-xl overflow-hidden">
+            <div class="divide-y divide-border">
+              <div class="px-4 py-3 flex gap-3">
+                <span class="font-mono text-[11px] text-muted pt-0.5 flex-shrink-0">a.</span>
+                <p class="text-[14px]">Wgraj zdjęcie na <strong>Google Drive</strong> (drive.google.com) – możesz to zrobić przez przeciągnięcie pliku na stronę Drive'a.</p>
+              </div>
+              <div class="px-4 py-3 flex gap-3">
+                <span class="font-mono text-[11px] text-muted pt-0.5 flex-shrink-0">b.</span>
+                <p class="text-[14px]">Kliknij plik prawym przyciskiem myszy → <strong>Udostępnij</strong> → ustaw na <strong>„Każdy z linkiem"</strong> → kliknij <strong>Kopiuj link</strong>.</p>
+              </div>
+              <div class="px-4 py-3 flex gap-3">
+                <span class="font-mono text-[11px] text-muted pt-0.5 flex-shrink-0">c.</span>
+                <p class="text-[14px]">W panelu kliknij <strong>„+ Dodaj zdjęcie"</strong> i wklej skopiowany link.</p>
+              </div>
+              <div class="px-4 py-3 flex gap-3">
+                <span class="font-mono text-[11px] text-muted pt-0.5 flex-shrink-0">d.</span>
+                <p class="text-[14px]">Możesz dodać kilka zdjęć. <strong>Pierwsze zdjęcie</strong> będzie miniaturą (okładką) na stronie głównej.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">4</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Wybierz status</p>
+          <div class="flex gap-3 flex-wrap mt-2 mb-2">
+            <span class="pill pill-odrzucony">draft</span>
+            <span class="pill pill-zrobiony">published</span>
+          </div>
+          <p class="text-muted text-[15px]"><strong>draft</strong> = zapisane, ale niewidoczne na stronie (możesz przygotować wpis i opublikować go później).<br/><strong>published</strong> = widoczne publicznie na hszdesign.pl.</p>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">5</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Kliknij „Zapisz"</p>
+          <p class="text-muted text-[15px]">Realizacja pojawi się na liście poniżej. Jeśli status to <span class="code">published</span>, będzie widoczna na stronie w ciągu kilku sekund.</p>
+        </div>
+      </li>
+    </ol>
+
+    <h3 class="font-display font-semibold text-[18px] mb-4">Jak edytować lub usunąć</h3>
+    <p class="text-muted text-[15px] leading-[1.7] mb-4">Na liście realizacji kliknij <strong>„Edytuj"</strong> przy wybranym projekcie. Otworzy się ten sam formularz z wypełnionymi danymi. Możesz zmienić co chcesz, a potem kliknąć „Zapisz".<br/>Żeby usunąć – kliknij czerwony przycisk „Usuń" na dole formularza. Pojawi się pytanie potwierdzające.</p>
+
+    <div class="warn">
+      <p class="text-[14px] leading-[1.6]"><strong>Uwaga:</strong> Usunięcie realizacji jest nieodwracalne. Jeśli chcesz ją tylko ukryć ze strony – zmień status na <span class="code">draft</span> zamiast usuwać.</p>
+    </div>
+  </section>
+
+  <hr class="border-border mb-14"/>
+
+  <!-- ===== 04 TEKSTY ===== -->
+  <section id="teksty" class="mb-16">
+    <div class="section-eyebrow mb-4">Teksty</div>
+    <h2 class="font-display font-bold text-[26px] md:text-[32px] mb-3">Teksty na stronie</h2>
+    <p class="text-muted text-[16px] leading-[1.7] mb-8">Tutaj możesz zmieniać wybrane treści, które wyświetlają się na hszdesign.pl – bez dotykania kodu. Działa na zasadzie par klucz → wartość.</p>
+
+    <h3 class="font-display font-semibold text-[18px] mb-4">Jak edytować tekst</h3>
+    <ol class="space-y-6 mb-8">
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">1</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Znajdź klucz, który chcesz zmienić</p>
+          <p class="text-muted text-[15px]">Klucze opisują co dana wartość oznacza, np. <span class="code">contact_phone</span> to numer telefonu.</p>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">2</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Kliknij w pole z wartością i wpisz nową treść</p>
+        </div>
+      </li>
+      <li class="flex gap-5">
+        <span class="step-num flex-shrink-0 w-10 text-right">3</span>
+        <div>
+          <p class="font-medium text-[16px] mb-1">Kliknij „Zapisz wszystko" na górze</p>
+          <p class="text-muted text-[15px]">Zmiany są zapisywane dla wszystkich kluczy jednocześnie po kliknięciu tego jednego przycisku.</p>
+        </div>
+      </li>
+    </ol>
+
+    <h3 class="font-display font-semibold text-[18px] mb-4">Jak dodać numer telefonu</h3>
+    <p class="text-muted text-[15px] leading-[1.7] mb-4">Numer telefonu to klucz <span class="code">contact_phone</span>. Żeby go dodać lub zaktualizować:</p>
+    <div class="bg-surface border border-border rounded-xl overflow-hidden mb-6">
+      <div class="divide-y divide-border">
+        <div class="px-4 py-3 flex gap-3">
+          <span class="font-mono text-[11px] text-muted pt-0.5 flex-shrink-0">1.</span>
+          <p class="text-[14px]">Jeśli klucz <span class="code">contact_phone</span> już istnieje – po prostu wpisz numer w pole wartości.</p>
+        </div>
+        <div class="px-4 py-3 flex gap-3">
+          <span class="font-mono text-[11px] text-muted pt-0.5 flex-shrink-0">2.</span>
+          <p class="text-[14px]">Jeśli go nie ma – na dole sekcji Teksty jest formularz „+ Dodaj". Wpisz <span class="code">contact_phone</span> jako klucz i np. <span class="code">+48 600 000 000</span> jako wartość, kliknij „+ Dodaj".</p>
+        </div>
+        <div class="px-4 py-3 flex gap-3">
+          <span class="font-mono text-[11px] text-muted pt-0.5 flex-shrink-0">3.</span>
+          <p class="text-[14px]">Kliknij „Zapisz wszystko".</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <p class="text-[14px] leading-[1.6]"><strong>Wskazówka:</strong> Na razie numer telefonu wpisany tutaj nie pojawia się automatycznie na stronie – wymaga to drobnej aktualizacji kodu. Zapytaj Maćka gdy będziesz gotowy i uzgodnicie numer.</p>
+    </div>
+  </section>
+
+  <hr class="border-border mb-14"/>
+
+  <!-- PYTANIA -->
+  <section class="mb-16">
+    <div class="section-eyebrow mb-4">Pytania</div>
+    <h2 class="font-display font-bold text-[26px] md:text-[32px] mb-8">Coś nie działa?</h2>
+
+    <div class="space-y-4">
+      <div class="bg-surface border border-border rounded-xl p-5">
+        <p class="font-medium text-[16px] mb-1">Panel pokazuje błąd przy logowaniu</p>
+        <p class="text-muted text-[15px]">Sprawdź, czy logujesz się kontem <span class="code">dominik@hszdesign.pl</span>. Inne konta Google nie mają dostępu.</p>
+      </div>
+      <div class="bg-surface border border-border rounded-xl p-5">
+        <p class="font-medium text-[16px] mb-1">Zdjęcie realizacji nie wyświetla się na stronie</p>
+        <p class="text-muted text-[15px]">Upewnij się, że zdjęcie w Google Drive jest ustawione jako „Każdy z linkiem może wyświetlać". Jeśli jest prywatne – strona nie będzie mogła go pobrać.</p>
+      </div>
+      <div class="bg-surface border border-border rounded-xl p-5">
+        <p class="font-medium text-[16px] mb-1">Realizacja nie pojawia się na stronie głównej</p>
+        <p class="text-muted text-[15px]">Sprawdź, czy status jest ustawiony na <span class="code">published</span>, a nie <span class="code">draft</span>.</p>
+      </div>
+      <div class="bg-surface border border-border rounded-xl p-5">
+        <p class="font-medium text-[16px] mb-1">Cokolwiek innego</p>
+        <p class="text-muted text-[15px]">Napisz do Maćka – <a href="mailto:maciej.trystula@gmail.com" class="underline underline-offset-2 text-ink">maciej.trystula@gmail.com</a>. Wie co i jak w tej stronie. &#x1F60A;</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="border-t border-border pt-8 flex items-center justify-between">
+    <a href="index.html" class="inline-flex items-center gap-2 text-[14px] text-muted hover:text-ink transition">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
+      Wróć do panelu
+    </a>
+    <span class="mono-label text-muted">HSZ Design Admin</span>
+  </div>
+
+</main>
+</body>
+</html>
