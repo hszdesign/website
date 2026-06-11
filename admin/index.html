@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>HSZ — Admin</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg:'#FAFAFA', surface:'#FFFFFF', ink:'#0A0A0A',
+          muted:'#737373', border:'#E5E5E5',
+          accent:'#0A0A0A', 'accent-dark':'#404040',
+          danger:'#B91C1C',
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"','sans-serif'],
+          sans:    ['Inter','sans-serif'],
+          mono:    ['"JetBrains Mono"','monospace'],
+        },
+      },
+    },
+  };
+</script>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<!-- Alpine -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<style>
+  body { font-family: 'Inter', sans-serif; background:#FAFAFA; color:#0A0A0A; }
+  [x-cloak] { display: none !important; }
+  .clip-hex { clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+  input, textarea, select { font: inherit; }
+  .field { @apply w-full bg-white border border-border rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink transition; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium transition; }
+  .btn-primary { @apply btn bg-ink text-white hover:bg-accent-dark; }
+  .btn-ghost { @apply btn border border-border text-ink hover:bg-bg; }
+  .btn-danger { @apply btn text-danger hover:bg-danger/5 border border-danger/20; }
+  .pill { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-mono uppercase tracking-wider; }
+  .pill-nowy        { @apply pill bg-blue-50 text-blue-700; }
+  .pill-wyceniony   { @apply pill bg-amber-50 text-amber-700; }
+  .pill-w_realizacji{ @apply pill bg-violet-50 text-violet-700; }
+  .pill-zrobiony    { @apply pill bg-emerald-50 text-emerald-700; }
+  .pill-odrzucony   { @apply pill bg-neutral-100 text-neutral-600; }
+  .pill-draft       { @apply pill bg-neutral-100 text-neutral-600; }
+  .pill-published   { @apply pill bg-emerald-50 text-emerald-700; }
+</style>
+</head>
+
+<body x-data="admin()" x-init="init()">
+
+<!-- ============================== TOP BAR ============================== -->
+<header class="sticky top-0 z-30 bg-white/85 backdrop-blur border-b border-border">
+  <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between gap-4">
+    <a href="../" class="flex items-center gap-3" aria-label="HSZ Design">
+      <span class="block w-9 h-9 bg-ink clip-hex grid place-items-center">
+        <span class="font-display font-extrabold text-white text-[12px] tracking-tight">HSZ</span>
+      </span>
+      <span class="font-display font-bold text-[15px]">Admin</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <template x-if="user">
+        <div class="flex items-center gap-3">
+          <span class="hidden md:block text-[13px] text-muted" x-text="user.email"></span>
+          <button class="btn-ghost" @click="signOut()">Wyloguj</button>
+        </div>
+      </template>
+    </div>
+  </div>
+</header>
+
+<!-- ============================== LOGIN GATE ============================== -->
+<template x-if="!user">
+<main class="min-h-[80vh] grid place-items-center px-5">
+  <div class="text-center max-w-md">
+    <span class="block w-20 h-20 bg-ink clip-hex grid place-items-center mx-auto mb-6">
+      <span class="font-display font-extrabold text-white text-[24px] tracking-tight">HSZ</span>
+    </span>
+    <h1 class="font-display text-3xl font-bold mb-2">Panel admin</h1>
+    <p class="text-muted mb-6 text-[15px]">Zaloguj się kontem Google z whitelisty.</p>
+    <div id="g_signin" class="flex justify-center"></div>
+    <p x-show="authError" x-cloak class="mt-4 text-danger text-[13px]" x-text="authError"></p>
+    <p class="mt-8 font-mono text-[11px] text-muted uppercase tracking-widest">— Tylko dla HSZ Design</p>
+  </div>
+</main>
+</template>
+
+<!-- ============================== APP ============================== -->
+<template x-if="user">
+<main class="max-w-6xl mx-auto px-5 py-8" x-cloak>
+
+  <!-- Tabs -->
+  <nav class="flex gap-1 border-b border-border mb-8 overflow-x-auto">
+    <template x-for="t in tabs" :key="t.key">
+      <button class="px-4 py-3 text-[14px] font-medium border-b-2 transition whitespace-nowrap"
+              :class="tab===t.key ? 'border-ink text-ink' : 'border-transparent text-muted hover:text-ink'"
+              @click="tab=t.key">
+        <span x-text="t.label"></span>
+        <span x-show="t.badge" class="font-mono text-[11px] text-muted ml-1" x-text="'('+t.badge+')'"></span>
+      </button>
+    </template>
+  </nav>
+
+  <!-- ============================== TAB: BRIEFY ============================== -->
+  <section x-show="tab==='briefy'" x-cloak>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+      <h2 class="font-display text-2xl font-bold">Briefy klientów</h2>
+      <div class="flex items-center gap-2">
+        <select class="field !py-2 !w-auto" x-model="briefFilter">
+          <option value="">Wszystkie statusy</option>
+          <template x-for="s in statuses" :key="s">
+            <option :value="s" x-text="s"></option>
+          </template>
+        </select>
+        <button class="btn-ghost" @click="loadBriefy()" :disabled="loading.briefy">
+          <span x-text="loading.briefy ? '...' : 'Odśwież'"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-surface border border-border rounded-xl overflow-hidden">
+      <template x-if="filteredBriefy.length === 0 && !loading.briefy">
+        <p class="text-muted text-[14px] p-8 text-center">Brak briefów.</p>
+      </template>
+      <template x-for="b in filteredBriefy" :key="b.id">
+        <article class="border-b border-border last:border-b-0">
+          <button class="w-full text-left px-5 py-4 flex items-start justify-between gap-4 hover:bg-bg transition"
+                  @click="b._open = !b._open">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-3 mb-1 flex-wrap">
+                <span class="font-medium text-[15px]" x-text="b.name"></span>
+                <span :class="'pill-'+(b.status||'nowy')" x-text="b.status||'nowy'"></span>
+              </div>
+              <p class="text-[13px] text-muted truncate" x-text="b.email + ' · ' + formatDate(b.created_at)"></p>
+            </div>
+            <span class="font-mono text-muted text-[12px] mt-1" x-text="b._open?'−':'+'"></span>
+          </button>
+          <div x-show="b._open" x-cloak class="px-5 pb-5 space-y-4">
+            <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-[14px]">
+              <div><dt class="text-muted text-[12px] font-mono uppercase tracking-wider mb-0.5">Email</dt><dd x-text="b.email"></dd></div>
+              <div><dt class="text-muted text-[12px] font-mono uppercase tracking-wider mb-0.5">Telefon</dt><dd x-text="b.phone || '—'"></dd></div>
+              <div class="sm:col-span-2"><dt class="text-muted text-[12px] font-mono uppercase tracking-wider mb-0.5">Opis</dt><dd class="whitespace-pre-wrap" x-text="b.description"></dd></div>
+              <div class="sm:col-span-2"><dt class="text-muted text-[12px] font-mono uppercase tracking-wider mb-0.5">Plik 3D</dt>
+                <dd>
+                  <template x-if="b.file_url"><a :href="b.file_url" target="_blank" rel="noopener" class="underline" x-text="b.file_name || 'pobierz'"></a></template>
+                  <template x-if="!b.file_url"><span class="text-muted">— brak —</span></template>
+                </dd>
+              </div>
+            </dl>
+            <div class="flex flex-wrap items-end gap-3 pt-3 border-t border-border">
+              <label class="flex-1 min-w-[180px]">
+                <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Status</span>
+                <select class="field !w-full" x-model="b.status">
+                  <template x-for="s in statuses" :key="s"><option :value="s" x-text="s"></option></template>
+                </select>
+              </label>
+              <label class="flex-[2] min-w-[240px]">
+                <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Notatka wewnętrzna</span>
+                <input class="field" x-model="b.notes" placeholder="np. Zaproponowana cena 380 zł, czas 5 dni"/>
+              </label>
+              <button class="btn-primary" @click="saveBriefStatus(b)" :disabled="b._saving">
+                <span x-text="b._saving ? '…' : 'Zapisz'"></span>
+              </button>
+            </div>
+          </div>
+        </article>
+      </template>
+    </div>
+  </section>
+
+  <!-- ============================== TAB: REALIZACJE ============================== -->
+  <section x-show="tab==='realizacje'" x-cloak>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+      <h2 class="font-display text-2xl font-bold">Realizacje</h2>
+      <button class="btn-primary" @click="newRealizacja()">+ Nowa realizacja</button>
+    </div>
+
+    <!-- Editor -->
+    <div x-show="editingRealizacja" x-cloak class="bg-surface border border-border rounded-xl p-5 mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display text-lg font-bold" x-text="editingRealizacja?.id ? 'Edytuj realizację' : 'Nowa realizacja'"></h3>
+        <button class="text-muted hover:text-ink text-sm" @click="editingRealizacja=null">✕ Zamknij</button>
+      </div>
+      <form @submit.prevent="saveRealizacja()" class="grid sm:grid-cols-2 gap-4">
+        <label class="sm:col-span-2">
+          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Tytuł *</span>
+          <input class="field" x-model="editingRealizacja.title" required/>
+        </label>
+        <label>
+          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Slug (URL)</span>
+          <input class="field" x-model="editingRealizacja.slug" placeholder="auto z tytułu"/>
+        </label>
+        <label>
+          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Status</span>
+          <select class="field" x-model="editingRealizacja.status">
+            <option value="draft">draft</option>
+            <option value="published">published</option>
+          </select>
+        </label>
+        <label>
+          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Materiał</span>
+          <input class="field" x-model="editingRealizacja.material" placeholder="PLA / PETG / żywica..."/>
+        </label>
+        <label>
+          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Wymiary</span>
+          <input class="field" x-model="editingRealizacja.dimensions" placeholder="np. 200×150×90 mm"/>
+        </label>
+        <label class="sm:col-span-2">
+          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Opis</span>
+          <textarea class="field" rows="4" x-model="editingRealizacja.description"></textarea>
+        </label>
+        <div class="sm:col-span-2">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[12px] font-mono uppercase tracking-wider text-muted">Zdjęcia (linki Google Drive, pierwsze = miniatura)</span>
+            <button type="button" class="btn-ghost !py-1 !px-3 text-[12px]" @click="editingRealizacja.photos.push('')">+ Dodaj zdjęcie</button>
+          </div>
+          <p class="text-[12px] text-muted mb-2">Wskazówka: w Drive prawy klik → <i>Share</i> → <i>Anyone with the link</i>, potem skopiuj link. Można też wkleić bezpośredni URL JPG/PNG.</p>
+          <div class="space-y-2">
+            <template x-for="(_, i) in editingRealizacja.photos" :key="i">
+              <div class="flex gap-2">
+                <input class="field flex-1" :placeholder="'https://drive.google.com/...' " x-model="editingRealizacja.photos[i]"/>
+                <button type="button" class="btn-ghost !px-3" @click="editingRealizacja.photos.splice(i,1)">✕</button>
+              </div>
+            </template>
+            <p x-show="editingRealizacja.photos.length===0" class="text-muted text-[13px]">Brak zdjęć — kliknij „Dodaj zdjęcie".</p>
+          </div>
+        </div>
+        <div class="sm:col-span-2 flex items-center justify-between pt-3 border-t border-border">
+          <template x-if="editingRealizacja.id">
+            <button type="button" class="btn-danger" @click="deleteRealizacja()">Usuń</button>
+          </template>
+          <div class="flex gap-2 ml-auto">
+            <button type="button" class="btn-ghost" @click="editingRealizacja=null">Anuluj</button>
+            <button type="submit" class="btn-primary" :disabled="saving">
+              <span x-text="saving ? '…' : 'Zapisz'"></span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- List -->
+    <div class="bg-surface border border-border rounded-xl overflow-hidden">
+      <template x-if="realizacje.length === 0 && !loading.realizacje">
+        <p class="text-muted text-[14px] p-8 text-center">Brak realizacji. Dodaj pierwszą.</p>
+      </template>
+      <template x-for="r in realizacje" :key="r.id">
+        <article class="border-b border-border last:border-b-0 px-5 py-4 flex items-center gap-4 hover:bg-bg transition">
+          <div class="w-12 h-12 bg-bg clip-hex overflow-hidden flex-shrink-0 grid place-items-center">
+            <template x-if="r.cover"><img :src="r.cover" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer"/></template>
+            <template x-if="!r.cover"><span class="text-muted text-[10px] font-mono">—</span></template>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 mb-0.5 flex-wrap">
+              <span class="font-medium text-[15px]" x-text="r.title"></span>
+              <span :class="'pill-'+(r.status||'draft')" x-text="r.status||'draft'"></span>
+            </div>
+            <p class="text-[12px] text-muted font-mono" x-text="r.slug + ' · ' + (r.photos?.length||0) + ' zdj.'"></p>
+          </div>
+          <button class="btn-ghost" @click="editRealizacja(r)">Edytuj</button>
+        </article>
+      </template>
+    </div>
+  </section>
+
+  <!-- ============================== TAB: TEKSTY ============================== -->
+  <section x-show="tab==='content'" x-cloak>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+      <h2 class="font-display text-2xl font-bold">Teksty na stronie</h2>
+      <button class="btn-primary" @click="saveContent()" :disabled="saving">
+        <span x-text="saving ? '…' : 'Zapisz wszystko'"></span>
+      </button>
+    </div>
+    <div class="bg-surface border border-border rounded-xl p-5 space-y-5">
+      <template x-for="(_, key) in content" :key="key">
+        <label class="block">
+          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1" x-text="key"></span>
+          <textarea class="field" rows="2" x-model="content[key]"></textarea>
+        </label>
+      </template>
+      <div class="pt-4 border-t border-border">
+        <div class="flex gap-2">
+          <input class="field flex-1" placeholder="nowy_klucz" x-model="newContentKey"/>
+          <input class="field flex-[2]" placeholder="wartość" x-model="newContentValue"/>
+          <button type="button" class="btn-ghost" @click="addContentKey()">+ Dodaj</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <div x-show="toast.msg" x-cloak x-transition
+       class="fixed bottom-6 right-6 bg-ink text-white px-5 py-3 rounded-xl shadow-lg text-[14px] font-medium z-50"
+       :class="toast.type==='error' && 'bg-danger'">
+    <span x-text="toast.msg"></span>
+  </div>
+</main>
+</template>
+
+<script>
+// =================== CONFIG — podstaw po deployu GAS ===================
+const GAS_URL = 'https://script.google.com/macros/s/REPLACE_ME/exec';
+const GOOGLE_CLIENT_ID = 'REPLACE_ME.apps.googleusercontent.com';
+// =======================================================================
+
+function admin() {
+  return {
+    user: null,
+    idToken: null,
+    authError: '',
+    tab: 'briefy',
+    statuses: ['nowy','wyceniony','w_realizacji','zrobiony','odrzucony'],
+    briefy: [],
+    briefFilter: '',
+    realizacje: [],
+    editingRealizacja: null,
+    content: {},
+    newContentKey: '',
+    newContentValue: '',
+    loading: { briefy: false, realizacje: false, content: false },
+    saving: false,
+    toast: { msg: '', type: 'ok' },
+
+    get tabs() {
+      return [
+        { key: 'briefy',     label: 'Briefy',     badge: this.briefy.filter(b => (b.status||'nowy') === 'nowy').length || '' },
+        { key: 'realizacje', label: 'Realizacje', badge: this.realizacje.length || '' },
+        { key: 'content',    label: 'Teksty',     badge: '' },
+      ];
+    },
+
+    get filteredBriefy() {
+      if (!this.briefFilter) return this.briefy;
+      return this.briefy.filter(b => (b.status||'nowy') === this.briefFilter);
+    },
+
+    init() {
+      const wait = setInterval(() => {
+        if (window.google && google.accounts && google.accounts.id) {
+          clearInterval(wait);
+          this.setupGoogleSignIn();
+        }
+      }, 100);
+    },
+
+    setupGoogleSignIn() {
+      if (GOOGLE_CLIENT_ID.includes('REPLACE_ME')) {
+        this.authError = 'Brak konfiguracji GOOGLE_CLIENT_ID w site/admin/index.html';
+        return;
+      }
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (resp) => this.handleCredential(resp),
+      });
+      const target = document.getElementById('g_signin');
+      if (target) google.accounts.id.renderButton(target, { theme: 'outline', size: 'large', shape: 'pill' });
+      google.accounts.id.prompt();
+    },
+
+    handleCredential(resp) {
+      this.idToken = resp.credential;
+      const payload = this.decodeJwt(resp.credential);
+      this.user = { email: payload.email, name: payload.name, picture: payload.picture };
+      this.authError = '';
+      sessionStorage.setItem('hsz_admin_token', this.idToken);
+      this.loadAll();
+    },
+
+    decodeJwt(token) {
+      const part = token.split('.')[1];
+      return JSON.parse(atob(part.replace(/-/g,'+').replace(/_/g,'/')));
+    },
+
+    signOut() {
+      this.user = null; this.idToken = null;
+      sessionStorage.removeItem('hsz_admin_token');
+      if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+    },
+
+    async loadAll() {
+      await Promise.all([this.loadBriefy(), this.loadRealizacje(), this.loadContent()]);
+    },
+
+    async loadBriefy() {
+      this.loading.briefy = true;
+      try {
+        const data = await this.api('list_briefy', {});
+        this.briefy = data.map(b => ({ ...b, _open: false, _saving: false }));
+      } catch (e) { this.error(e); }
+      finally { this.loading.briefy = false; }
+    },
+
+    async saveBriefStatus(b) {
+      b._saving = true;
+      try {
+        await this.api('update_brief_status', { id: b.id, status: b.status, notes: b.notes || '' });
+        this.ok('Status zapisany');
+      } catch (e) { this.error(e); }
+      finally { b._saving = false; }
+    },
+
+    async loadRealizacje() {
+      this.loading.realizacje = true;
+      try { this.realizacje = await this.api('list_realizacje_all', {}); }
+      catch (e) { this.error(e); }
+      finally { this.loading.realizacje = false; }
+    },
+
+    newRealizacja() {
+      this.editingRealizacja = { title:'', slug:'', description:'', material:'', dimensions:'', photos:[], status:'draft' };
+    },
+
+    editRealizacja(r) {
+      this.editingRealizacja = JSON.parse(JSON.stringify(r));
+      if (!Array.isArray(this.editingRealizacja.photos)) this.editingRealizacja.photos = [];
+    },
+
+    async saveRealizacja() {
+      const r = this.editingRealizacja;
+      r.photos = r.photos.map(p => (p||'').trim()).filter(Boolean);
+      this.saving = true;
+      try {
+        await this.api('save_realizacja', { realizacja: r });
+        this.ok('Realizacja zapisana');
+        this.editingRealizacja = null;
+        await this.loadRealizacje();
+      } catch (e) { this.error(e); }
+      finally { this.saving = false; }
+    },
+
+    async deleteRealizacja() {
+      if (!confirm('Usunąć tę realizację? Nie da się cofnąć.')) return;
+      this.saving = true;
+      try {
+        await this.api('delete_realizacja', { id: this.editingRealizacja.id });
+        this.ok('Usunięto');
+        this.editingRealizacja = null;
+        await this.loadRealizacje();
+      } catch (e) { this.error(e); }
+      finally { this.saving = false; }
+    },
+
+    async loadContent() {
+      this.loading.content = true;
+      try { this.content = await this.api('get_content_admin', {}) || {}; }
+      catch (_) {
+        // fallback przez publiczny endpoint GET
+        try {
+          const res = await fetch(GAS_URL + '?action=get_content');
+          this.content = await res.json();
+        } catch (e) { this.error(e); }
+      }
+      finally { this.loading.content = false; }
+    },
+
+    addContentKey() {
+      const k = (this.newContentKey || '').trim();
+      if (!k) return;
+      this.content[k] = this.newContentValue || '';
+      this.newContentKey = ''; this.newContentValue = '';
+    },
+
+    async saveContent() {
+      this.saving = true;
+      try {
+        await this.api('save_content', { updates: this.content });
+        this.ok('Teksty zapisane');
+      } catch (e) { this.error(e); }
+      finally { this.saving = false; }
+    },
+
+    async api(action, body) {
+      if (GAS_URL.includes('REPLACE_ME')) throw new Error('Brak konfiguracji GAS_URL');
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        // text/plain żeby uniknąć CORS preflight; GAS i tak czyta postData.contents
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action, id_token: this.idToken, ...body }),
+        redirect: 'follow',
+      });
+      const data = await res.json();
+      if (data && data.ok === false) throw new Error(data.error || 'unknown_error');
+      return data;
+    },
+
+    formatDate(iso) {
+      if (!iso) return '';
+      try {
+        const d = new Date(iso);
+        return d.toLocaleString('pl-PL', { dateStyle: 'short', timeStyle: 'short' });
+      } catch { return iso; }
+    },
+
+    ok(msg)    { this.toast = { msg, type:'ok'  };  setTimeout(()=> this.toast.msg='', 2500); },
+    error(e)   {
+      console.error(e);
+      this.toast = { msg: e.message || String(e), type:'error' };
+      setTimeout(()=> this.toast.msg='', 4000);
+    },
+  };
+}
+</script>
+</body>
+</html>

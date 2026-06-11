@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HSZ Design — Studio druku 3D</title>
+<meta name="description" content="HSZ Design — polskie studio modelowania i druku 3D na zamówienie. Wyceniamy w 24h." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Caveat:wght@600&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg:           '#FAFAFA',
+          surface:      '#FFFFFF',
+          ink:          '#0A0A0A',
+          muted:        '#737373',
+          border:       '#E5E5E5',
+          accent:       '#0A0A0A',
+          'accent-dark':'#404040',
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          sans:    ['Inter', 'sans-serif'],
+          mono:    ['"JetBrains Mono"', 'monospace'],
+          script:  ['Caveat', 'cursive'],
+        },
+        letterSpacing: {
+          'widest-2': '0.18em',
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #FAFAFA;
+    color: #0A0A0A;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: #0A0A0A; color: #fff; }
+
+  /* Hex background pattern */
+  .hex-grid-bg {
+    background-color: #FAFAFA;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='64' viewBox='0 0 56 64'><g fill='none' stroke='%230A0A0A' stroke-width='1'><path d='M28 1 L55 16 L55 48 L28 63 L1 48 L1 16 Z'/></g></svg>");
+    background-size: 56px 64px;
+    background-position: 0 0;
+    background-repeat: repeat;
+  }
+  .hex-grid-overlay::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='64' viewBox='0 0 56 64'><g fill='none' stroke='%230A0A0A' stroke-width='1'><path d='M28 1 L55 16 L55 48 L28 63 L1 48 L1 16 Z'/></g></svg>");
+    background-size: 56px 64px;
+    opacity: 0.04;
+    pointer-events:none;
+  }
+
+  /* Hex clip-path */
+  .clip-hex {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+
+  /* Disable selection on nav */
+  nav button, nav a { -webkit-tap-highlight-color: transparent; }
+
+  /* Project card hover */
+  .project-card {
+    overflow: hidden;
+    position: relative;
+  }
+  .project-card img {
+    transition: transform .6s cubic-bezier(.22,.61,.36,1);
+  }
+  .project-card:hover img { transform: scale(1.04); }
+  .project-card .project-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(10,10,10,0) 35%, rgba(10,10,10,.78) 100%);
+    opacity: 0;
+    transition: opacity .35s ease;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 1.25rem 1.25rem 1.1rem;
+  }
+  .project-card:hover .project-overlay,
+  .project-card:focus-within .project-overlay { opacity: 1; }
+
+  /* Stepper connectors */
+  .step-arrow svg { display: block; }
+
+  /* Dropzone */
+  .dropzone-hex {
+    position: relative;
+    aspect-ratio: 1 / 0.866;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .dropzone-hex .hex-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .dropzone-hex .hex-content {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 1.5rem;
+  }
+  .dropzone-hex .hex-stroke { stroke: #0A0A0A; stroke-width: 1.5; fill: #FFFFFF; transition: all .25s ease; stroke-dasharray: 6 6; }
+  .dropzone-hex.is-drag .hex-stroke { stroke: #0A0A0A; stroke-width: 2.5; fill: #F0F0F0; }
+  .dropzone-hex.is-drag .hex-glyph { color: #0A0A0A; transform: scale(1.06); }
+  .dropzone-hex .hex-glyph { transition: all .25s ease; }
+  .dropzone-hex:hover .hex-stroke { stroke: #0A0A0A; fill: #F5F5F5; }
+  .dropzone-hex:focus-within .hex-stroke { stroke: #0A0A0A; }
+
+  /* FAQ */
+  .faq-item[aria-expanded="true"] .faq-toggle .bar-v { transform: rotate(90deg); opacity: 0; }
+  .faq-item[aria-expanded="true"] .faq-icon { color: #0A0A0A; }
+  .faq-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s ease; }
+  .faq-item[aria-expanded="true"] .faq-body { grid-template-rows: 1fr; }
+  .faq-body > div { overflow: hidden; }
+
+  /* Service card hex icon hover */
+  .svc-card:hover .svc-hex { fill: #F0F0F0; }
+  .svc-card:hover .svc-hex-stroke { stroke: #0A0A0A; }
+
+  /* Focus rings */
+  :focus-visible { outline: 2px solid #0A0A0A; outline-offset: 2px; border-radius: 4px; }
+
+  /* Nav blur */
+  .nav-blur {
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+  }
+
+  /* Hero hexagon art animation */
+  @keyframes floaty {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+  .hero-hex-float { animation: floaty 6s ease-in-out infinite; transform-origin: center; }
+
+  /* Stats divider */
+  .stat-divider + .stat-divider { border-left: 1px solid #E5E5E5; }
+
+  /* Mono label */
+  .mono-label {
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* Hide scroll on body when mobile menu open */
+  body.menu-open { overflow: hidden; }
+
+  /* Reveal animation */
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity .7s ease, transform .7s cubic-bezier(.22,.61,.36,1); }
+  .reveal.is-in { opacity: 1; transform: none; }
+
+  /* Buttons */
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-weight:500; transition: all .2s ease; }
+  .btn-accent { background:#0A0A0A; color:#fff; }
+  .btn-accent:hover { background:#404040; transform: translateY(-1px); box-shadow: 0 8px 24px -8px rgba(10,10,10,.35); }
+  .btn-ghost  { border:1px solid #0A0A0A; color:#0A0A0A; background:transparent; }
+  .btn-ghost:hover { background:#0A0A0A; color:#fff; }
+
+  /* Input styles */
+  .field {
+    width:100%;
+    background:#fff;
+    border:1px solid #E5E5E5;
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: #0A0A0A;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .field::placeholder { color: #A3A3A3; }
+  .field:focus { outline: none; border-color: #0A0A0A; box-shadow: 0 0 0 3px rgba(10,10,10,.06); }
+  .field:hover { border-color: #D4D4D4; }
+
+  /* Section number */
+  .section-eyebrow {
+    display:inline-flex; align-items:center; gap:.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: #0A0A0A;
+    font-weight: 500;
+  }
+  .section-eyebrow::before { content: ""; display:inline-block; width:24px; height:1px; background:#0A0A0A; }
+
+  /* Slight underline anim on nav links */
+  .nav-link { position: relative; }
+  .nav-link::after {
+    content: ""; position: absolute; left: 0; bottom: -4px; height: 1.5px; width: 0; background: #0A0A0A;
+    transition: width .25s ease;
+  }
+  .nav-link:hover::after { width: 100%; }
+</style>
+</head>
+<body class="bg-bg text-ink">
+
+<!-- ============================ NAV ============================ -->
+<header class="sticky top-0 z-50 nav-blur border-b border-border">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 h-16 md:h-[72px] flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-2 group" aria-label="HSZ Design — strona główna">
+      <img src="assets/hsz-logo.png" alt="HSZ Design" width="48" height="48" class="w-12 h-12 object-contain"/>
+      <span class="sr-only">HSZ Design</span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8" aria-label="Główna nawigacja">
+      <a href="#uslugi"    class="nav-link text-[14px] text-ink/80 hover:text-ink">Usługi</a>
+      <a href="#realizacje"class="nav-link text-[14px] text-ink/80 hover:text-ink">Realizacje</a>
+      <a href="#proces"    class="nav-link text-[14px] text-ink/80 hover:text-ink">Proces</a>
+      <a href="#faq"       class="nav-link text-[14px] text-ink/80 hover:text-ink">FAQ</a>
+      <a href="#brief"     class="btn btn-accent rounded-full px-5 py-2.5 text-[14px]">
+        Złóż brief
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+      </a>
+    </nav>
+
+    <button id="menuBtn" class="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-[5px]" aria-label="Otwórz menu" aria-expanded="false">
+      <span class="block w-5 h-[1.5px] bg-ink transition-transform"></span>
+      <span class="block w-5 h-[1.5px] bg-ink transition-opacity"></span>
+      <span class="block w-5 h-[1.5px] bg-ink transition-transform"></span>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobileMenu" class="md:hidden hidden border-t border-border bg-surface">
+    <nav class="px-5 py-6 flex flex-col gap-1" aria-label="Nawigacja mobilna">
+      <a href="#uslugi"     class="py-3 text-[16px] border-b border-border">Usługi</a>
+      <a href="#realizacje" class="py-3 text-[16px] border-b border-border">Realizacje</a>
+      <a href="#proces"     class="py-3 text-[16px] border-b border-border">Proces</a>
+      <a href="#faq"        class="py-3 text-[16px] border-b border-border">FAQ</a>
+      <a href="#brief"      class="btn btn-accent rounded-full mt-4 py-3 text-[15px]">
+        Złóż brief
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============================ HERO ============================ -->
+<section class="relative overflow-hidden">
+  <div class="hex-grid-overlay absolute inset-0"></div>
+
+  <div class="relative max-w-7xl mx-auto px-5 md:px-8 pt-16 md:pt-24 pb-16 md:pb-24">
+    <div class="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+
+      <!-- Copy -->
+      <div class="lg:col-span-7 reveal">
+        <div class="section-eyebrow mb-6">00 / Studio druku 3D</div>
+
+        <h1 class="font-display font-bold text-[44px] sm:text-[56px] md:text-[68px] lg:text-[78px] leading-[1.04] tracking-[-0.025em]">
+          Modelujemy<br/>
+          i drukujemy<br/>
+          <span class="relative inline-block">
+            obiekty
+            <svg class="absolute -bottom-3 left-0 w-full" height="10" viewBox="0 0 200 10" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M2 7 Q 50 1, 100 5 T 198 5" stroke="#0A0A0A" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </svg>
+          </span>
+          na zamówienie.
+        </h1>
+
+        <p class="mt-8 max-w-xl text-[18px] md:text-[20px] leading-[1.6] text-muted">
+          Projektujemy pod druk 3D i wykonujemy realizacje — od jednostkowych prezentów po prototypy dla firm. Wyślij plik lub pomysł, wracamy z wyceną w 24h.
+        </p>
+
+        <div class="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <a href="#brief" class="btn btn-accent rounded-full px-7 h-14 text-[15px]">
+            Złóż brief
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#realizacje" class="btn btn-ghost rounded-full px-7 h-14 text-[15px]">Zobacz realizacje</a>
+        </div>
+
+        <div class="mt-10 flex items-center gap-4 text-[13px] text-muted">
+          <div class="flex -space-x-1.5">
+            <span class="w-2 h-2 rounded-full bg-accent"></span>
+            <span class="w-2 h-2 rounded-full bg-accent/60"></span>
+            <span class="w-2 h-2 rounded-full bg-accent/30"></span>
+          </div>
+          <span class="mono-label text-muted">Dostępni — przyjmujemy zlecenia</span>
+        </div>
+      </div>
+
+      <!-- Hex art -->
+      <div class="lg:col-span-5 reveal">
+        <div class="relative mx-auto w-full max-w-[460px] aspect-square">
+          <!-- big hex frame -->
+          <svg viewBox="0 0 400 400" class="w-full h-full hero-hex-float" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <pattern id="hexpat" x="0" y="0" width="28" height="32" patternUnits="userSpaceOnUse">
+                <path d="M14 1 L27 8 L27 24 L14 31 L1 24 L1 8 Z" fill="none" stroke="#0A0A0A" stroke-width="0.5" opacity="0.25"/>
+              </pattern>
+            </defs>
+
+            <!-- outer hex -->
+            <path d="M200 20 L356 110 L356 290 L200 380 L44 290 L44 110 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.5"/>
+            <path d="M200 20 L356 110 L356 290 L200 380 L44 290 L44 110 Z" fill="url(#hexpat)"/>
+
+            <!-- inner isometric "cube" wireframe -->
+            <g transform="translate(200 210)">
+              <!-- iso cube -->
+              <g stroke="#0A0A0A" stroke-width="1.6" fill="none" stroke-linejoin="round">
+                <!-- top face -->
+                <path d="M0 -90 L78 -45 L0 0 L-78 -45 Z" fill="#FAFAFA"/>
+                <!-- right face -->
+                <path d="M78 -45 L78 45 L0 90 L0 0 Z" fill="#F0F0F0"/>
+                <!-- left face -->
+                <path d="M-78 -45 L-78 45 L0 90 L0 0 Z" fill="#FFFFFF"/>
+              </g>
+              <!-- inner hex highlight on top -->
+              <g transform="translate(0 -45)">
+                <path d="M0 -22 L19 -11 L19 11 L0 22 L-19 11 L-19 -11 Z" fill="#0A0A0A" opacity="0.95"/>
+                <path d="M0 -22 L19 -11 L19 11 L0 22 L-19 11 L-19 -11 Z" fill="none" stroke="#0A0A0A" stroke-width="1"/>
+              </g>
+              <!-- layered lines suggesting print layers -->
+              <g stroke="#0A0A0A" stroke-width="0.8" opacity="0.4">
+                <line x1="-70" y1="20" x2="-2" y2="60"/>
+                <line x1="-60" y1="30" x2="-2" y2="64"/>
+                <line x1="-50" y1="40" x2="-2" y2="68"/>
+              </g>
+            </g>
+
+            <!-- corner labels -->
+            <g font-family="JetBrains Mono, monospace" font-size="9" fill="#737373" letter-spacing="1.5">
+              <text x="62" y="105">0.2mm</text>
+              <text x="295" y="105">PLA</text>
+              <text x="62" y="298">INFILL 25%</text>
+              <text x="298" y="298">220×150</text>
+            </g>
+
+            <!-- small accent hex -->
+            <g transform="translate(330 75)">
+              <path d="M0 -14 L12 -7 L12 7 L0 14 L-12 7 L-12 -7 Z" fill="#0A0A0A"/>
+            </g>
+          </svg>
+
+          <!-- floating mono badges -->
+          <div class="absolute -left-2 top-12 hidden md:flex bg-surface border border-border rounded-full px-3 py-1.5 mono-label text-ink shadow-sm">
+            ⬡ FDM · SLA
+          </div>
+          <div class="absolute -right-2 bottom-12 hidden md:flex bg-ink text-white rounded-full px-3 py-1.5 mono-label shadow-sm">
+            24h · Wycena
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ STATS BAR ============================ -->
+  <div class="border-y border-border bg-surface">
+    <div class="max-w-7xl mx-auto px-5 md:px-8 grid grid-cols-2 md:grid-cols-4">
+      <div class="stat-divider py-7 md:py-9 px-2 md:px-6 md:border-l md:border-border first:border-l-0">
+        <div class="font-mono text-[28px] md:text-[32px] font-medium text-ink leading-none">120<span class="text-accent">+</span></div>
+        <div class="mono-label text-muted mt-2">Zrealizowanych projektów</div>
+      </div>
+      <div class="stat-divider py-7 md:py-9 px-2 md:px-6 border-l border-border">
+        <div class="font-mono text-[28px] md:text-[32px] font-medium text-ink leading-none">48<span class="text-accent">h</span></div>
+        <div class="mono-label text-muted mt-2">Średni czas wyceny</div>
+      </div>
+      <div class="stat-divider py-7 md:py-9 px-2 md:px-6 border-l border-border md:border-l md:border-border border-t md:border-t-0">
+        <div class="font-mono text-[28px] md:text-[32px] font-medium text-ink leading-none">12</div>
+        <div class="mono-label text-muted mt-2">Materiałów w ofercie</div>
+      </div>
+      <div class="stat-divider py-7 md:py-9 px-2 md:px-6 border-l border-border border-t md:border-t-0">
+        <div class="font-mono text-[28px] md:text-[32px] font-medium text-ink leading-none">5<span class="text-accent">★</span></div>
+        <div class="mono-label text-muted mt-2">Średnia ocena</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 01 — CO ROBIMY ============================ -->
+<section id="uslugi" class="py-24 md:py-32">
+  <div class="max-w-7xl mx-auto px-5 md:px-8">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14 md:mb-20 reveal">
+      <div>
+        <div class="section-eyebrow mb-4">01 / Co robimy</div>
+        <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Usługi</h2>
+      </div>
+      <p class="text-muted text-[16px] md:max-w-sm">Pełny stos: od pomysłu i modelu, przez druk różnymi technologiami, po wykończenie i małe serie.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <!-- card 1 -->
+      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors hover:bg-[#F5F5F5] reveal">
+        <div class="mb-7">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+            <path class="svc-hex svc-hex-stroke" d="M28 4 L48 16 L48 40 L28 52 L8 40 L8 16 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.4"/>
+            <!-- pen/vector glyph -->
+            <g transform="translate(28 28)" stroke="#0A0A0A" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="-7" cy="-6" r="1.6" fill="#0A0A0A"/>
+              <circle cx="8"  cy="-3" r="1.6" fill="#0A0A0A"/>
+              <circle cx="-2" cy="8"  r="1.6" fill="#0A0A0A" stroke="#0A0A0A"/>
+              <path d="M-7 -6 L8 -3 L-2 8 Z"/>
+            </g>
+          </svg>
+        </div>
+        <h3 class="font-display font-bold text-[20px] mb-2.5">Modelowanie 3D</h3>
+        <p class="text-muted text-[15px] leading-[1.6]">Tworzymy modele od zera lub na podstawie szkicu, zdjęcia, pomiarów.</p>
+        <div class="mt-5 mono-label text-muted">Blender · Fusion · ZBrush</div>
+      </article>
+
+      <!-- card 2 -->
+      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors hover:bg-[#F5F5F5] reveal">
+        <div class="mb-7">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+            <path class="svc-hex svc-hex-stroke" d="M28 4 L48 16 L48 40 L28 52 L8 40 L8 16 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.4"/>
+            <g transform="translate(28 28)" stroke="#0A0A0A" stroke-width="1.5" fill="none" stroke-linecap="round">
+              <!-- filament spool -->
+              <circle cx="0" cy="0" r="9"/>
+              <circle cx="0" cy="0" r="3" fill="#0A0A0A"/>
+              <path d="M9 0 Q 12 6 6 9" stroke="#0A0A0A"/>
+              <path d="M-9 0 Q -12 -6 -6 -9" stroke="#0A0A0A"/>
+            </g>
+          </svg>
+        </div>
+        <h3 class="font-display font-bold text-[20px] mb-2.5">Druk FDM</h3>
+        <p class="text-muted text-[15px] leading-[1.6]">Filament PLA, PETG, ABS, TPU. Duże gabaryty, prototypy, użytkowe części.</p>
+        <div class="mt-5 mono-label text-muted">Do 300×300×400 mm</div>
+      </article>
+
+      <!-- card 3 -->
+      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors hover:bg-[#F5F5F5] reveal">
+        <div class="mb-7">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+            <path class="svc-hex svc-hex-stroke" d="M28 4 L48 16 L48 40 L28 52 L8 40 L8 16 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.4"/>
+            <g transform="translate(28 28)" stroke="#0A0A0A" stroke-width="1.5" fill="none" stroke-linecap="round">
+              <!-- droplet / resin -->
+              <path d="M0 -10 C 7 -2 7 6 0 10 C -7 6 -7 -2 0 -10 Z" fill="#FAFAFA"/>
+              <circle cx="-2" cy="3" r="1.5" fill="#0A0A0A" stroke="#0A0A0A"/>
+            </g>
+          </svg>
+        </div>
+        <h3 class="font-display font-bold text-[20px] mb-2.5">Druk żywiczny (SLA)</h3>
+        <p class="text-muted text-[15px] leading-[1.6]">Wysoka rozdzielczość, biżuteria, modele, drobny detal.</p>
+        <div class="mt-5 mono-label text-muted">25 µm warstwa</div>
+      </article>
+
+      <!-- card 4 -->
+      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors hover:bg-[#F5F5F5] reveal">
+        <div class="mb-7">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+            <path class="svc-hex svc-hex-stroke" d="M28 4 L48 16 L48 40 L28 52 L8 40 L8 16 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.4"/>
+            <g transform="translate(28 28)" stroke="#0A0A0A" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <!-- brush -->
+              <path d="M-9 9 L4 -4"/>
+              <path d="M4 -4 L9 -9 L11 -7 L6 -2 Z" fill="#0A0A0A"/>
+              <path d="M-9 9 L-5 5 L-2 8 L-6 12 Z" fill="#0A0A0A" stroke="#0A0A0A"/>
+            </g>
+          </svg>
+        </div>
+        <h3 class="font-display font-bold text-[20px] mb-2.5">Custom & post-processing</h3>
+        <p class="text-muted text-[15px] leading-[1.6]">Malowanie, sklejanie, wykończenie, małe serie.</p>
+        <div class="mt-5 mono-label text-muted">Spray · Airbrush · Mont.</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 02 — REALIZACJE ============================ -->
+<section id="realizacje" class="py-24 md:py-32 bg-surface border-y border-border">
+  <div class="max-w-7xl mx-auto px-5 md:px-8">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14 md:mb-20 reveal">
+      <div>
+        <div class="section-eyebrow mb-4">02 / Realizacje</div>
+        <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Wybrane projekty</h2>
+      </div>
+      <p class="text-muted text-[16px] md:max-w-sm">Przekrój ostatnich zleceń — od jednostek dla klientów indywidualnych po małe serie dla firm.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+      <!-- 1 -->
+      <a href="#" class="project-card block aspect-square rounded-xl bg-ink reveal" aria-label="Lampka Hex">
+        <img src="https://placehold.co/800x800/0A0A0A/FAFAFA?text=Lampka+Hex" alt="Lampka Hex" loading="lazy" class="w-full h-full object-cover"/>
+        <div class="project-overlay">
+          <div class="mono-label text-white/70 mb-1">PLA · 200×150 mm</div>
+          <div class="font-display font-bold text-white text-[20px]">Lampka Hex</div>
+        </div>
+      </a>
+      <!-- 2 -->
+      <a href="#" class="project-card block aspect-square rounded-xl bg-ink reveal" aria-label="Replika części retro">
+        <img src="https://placehold.co/800x800/0A0A0A/FAFAFA?text=Replika+czesci+retro" alt="Replika części retro" loading="lazy" class="w-full h-full object-cover"/>
+        <div class="project-overlay">
+          <div class="mono-label text-white/70 mb-1">PETG · skan 3D</div>
+          <div class="font-display font-bold text-white text-[20px]">Replika części retro</div>
+        </div>
+      </a>
+      <!-- 3 -->
+      <a href="#" class="project-card block aspect-square rounded-xl bg-ink reveal" aria-label="Maskotka firmowa Voxel">
+        <img src="https://placehold.co/800x800/0A0A0A/FAFAFA?text=Maskotka+Voxel" alt="Maskotka firmowa Voxel" loading="lazy" class="w-full h-full object-cover"/>
+        <div class="project-overlay">
+          <div class="mono-label text-white/70 mb-1">SLA · seria 25 szt.</div>
+          <div class="font-display font-bold text-white text-[20px]">Maskotka firmowa Voxel</div>
+        </div>
+      </a>
+      <!-- 4 -->
+      <a href="#" class="project-card block aspect-square rounded-xl bg-ink reveal" aria-label="Prototyp uchwytu">
+        <img src="https://placehold.co/800x800/0A0A0A/FAFAFA?text=Prototyp+uchwytu" alt="Prototyp uchwytu" loading="lazy" class="w-full h-full object-cover"/>
+        <div class="project-overlay">
+          <div class="mono-label text-white/70 mb-1">ABS · prototyp v3</div>
+          <div class="font-display font-bold text-white text-[20px]">Prototyp uchwytu</div>
+        </div>
+      </a>
+      <!-- 5 -->
+      <a href="#" class="project-card block aspect-square rounded-xl bg-ink reveal" aria-label="Topograficzna mapa Tatr">
+        <img src="https://placehold.co/800x800/0A0A0A/FAFAFA?text=Mapa+Tatr" alt="Topograficzna mapa Tatr" loading="lazy" class="w-full h-full object-cover"/>
+        <div class="project-overlay">
+          <div class="mono-label text-white/70 mb-1">PLA · 300×220 mm</div>
+          <div class="font-display font-bold text-white text-[20px]">Topograficzna mapa Tatr</div>
+        </div>
+      </a>
+      <!-- 6 -->
+      <a href="#" class="project-card block aspect-square rounded-xl bg-ink reveal" aria-label="Geometryczna doniczka">
+        <img src="https://placehold.co/800x800/0A0A0A/FAFAFA?text=Geometryczna+doniczka" alt="Geometryczna doniczka" loading="lazy" class="w-full h-full object-cover"/>
+        <div class="project-overlay">
+          <div class="mono-label text-white/70 mb-1">PETG · seria 8 szt.</div>
+          <div class="font-display font-bold text-white text-[20px]">Geometryczna doniczka</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="mt-12 md:mt-14 text-center">
+      <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-accent-dark font-medium">
+        Zobacz wszystkie realizacje
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 03 — PROCES ============================ -->
+<section id="proces" class="py-24 md:py-32 relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-5 md:px-8">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14 md:mb-20 reveal">
+      <div>
+        <div class="section-eyebrow mb-4">03 / Proces</div>
+        <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Jak pracujemy</h2>
+      </div>
+      <p class="text-muted text-[16px] md:max-w-sm">Cztery kroki, jasne terminy, bez ukrytych kosztów. Komunikacja na każdym etapie.</p>
+    </div>
+
+    <ol class="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-3 relative">
+      <!-- 1 -->
+      <li class="flex md:block items-start gap-5 reveal">
+        <div class="flex-shrink-0 md:mb-6">
+          <span class="font-mono text-[40px] md:text-[48px] text-accent leading-none font-medium">01</span>
+        </div>
+        <div class="md:max-w-[200px]">
+          <h3 class="font-display font-bold text-[18px] mb-2">Brief</h3>
+          <p class="text-muted text-[14px] leading-[1.6]">Wysyłasz plik lub opisujesz pomysł.</p>
+        </div>
+        <!-- desktop arrow -->
+        <div class="hidden md:block absolute right-0 top-3 -translate-x-[calc(100%+12px)] translate-x-[58px]"></div>
+      </li>
+
+      <!-- arrow gap handled with bg line -->
+      <!-- 2 -->
+      <li class="flex md:block items-start gap-5 reveal relative">
+        <div class="hidden md:block absolute -left-6 top-6 text-ink/30">
+          <svg width="24" height="14" viewBox="0 0 24 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 7h22"/><path d="M17 1l6 6-6 6"/></svg>
+        </div>
+        <div class="flex-shrink-0 md:mb-6">
+          <span class="font-mono text-[40px] md:text-[48px] text-accent leading-none font-medium">02</span>
+        </div>
+        <div class="md:max-w-[200px]">
+          <h3 class="font-display font-bold text-[18px] mb-2">Wycena</h3>
+          <p class="text-muted text-[14px] leading-[1.6]">Dostajesz cenę i termin w 24h.</p>
+        </div>
+      </li>
+
+      <!-- 3 -->
+      <li class="flex md:block items-start gap-5 reveal relative">
+        <div class="hidden md:block absolute -left-6 top-6 text-ink/30">
+          <svg width="24" height="14" viewBox="0 0 24 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 7h22"/><path d="M17 1l6 6-6 6"/></svg>
+        </div>
+        <div class="flex-shrink-0 md:mb-6">
+          <span class="font-mono text-[40px] md:text-[48px] text-accent leading-none font-medium">03</span>
+        </div>
+        <div class="md:max-w-[200px]">
+          <h3 class="font-display font-bold text-[18px] mb-2">Druk</h3>
+          <p class="text-muted text-[14px] leading-[1.6]">Realizujemy i informujemy o postępie.</p>
+        </div>
+      </li>
+
+      <!-- 4 -->
+      <li class="flex md:block items-start gap-5 reveal relative">
+        <div class="hidden md:block absolute -left-6 top-6 text-ink/30">
+          <svg width="24" height="14" viewBox="0 0 24 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 7h22"/><path d="M17 1l6 6-6 6"/></svg>
+        </div>
+        <div class="flex-shrink-0 md:mb-6">
+          <span class="font-mono text-[40px] md:text-[48px] text-accent leading-none font-medium">04</span>
+        </div>
+        <div class="md:max-w-[200px]">
+          <h3 class="font-display font-bold text-[18px] mb-2">Wysyłka</h3>
+          <p class="text-muted text-[14px] leading-[1.6]">Pakujemy i wysyłamy kurierem.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================ 04 — BRIEF FORM ============================ -->
+<section id="brief" class="py-24 md:py-32 bg-surface border-y border-border relative overflow-hidden">
+  <!-- subtle hex deco -->
+  <svg class="absolute -top-10 -right-10 w-72 h-72 opacity-[0.04] pointer-events-none" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M100 10 L182 55 L182 145 L100 190 L18 145 L18 55 Z" fill="none" stroke="#0A0A0A" stroke-width="1"/>
+    <path d="M100 40 L156 70 L156 130 L100 160 L44 130 L44 70 Z" fill="none" stroke="#0A0A0A" stroke-width="1"/>
+    <path d="M100 70 L130 85 L130 115 L100 130 L70 115 L70 85 Z" fill="none" stroke="#0A0A0A" stroke-width="1"/>
+  </svg>
+
+  <div class="relative max-w-7xl mx-auto px-5 md:px-8">
+    <div class="max-w-2xl mx-auto text-center mb-12 md:mb-16 reveal">
+      <div class="section-eyebrow mb-4 justify-center inline-flex">04 / Brief</div>
+      <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Zacznijmy projekt</h2>
+      <p class="mt-5 text-muted text-[17px] md:text-[18px] leading-[1.6]">Wypełnij krótki brief — wracamy z wyceną w 24 godziny.</p>
+    </div>
+
+    <form id="briefForm" class="max-w-[640px] mx-auto reveal" novalidate>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="f-name" class="mono-label text-muted block mb-2">Imię i nazwisko *</label>
+          <input id="f-name" name="name" type="text" required class="field" placeholder="Anna Kowalska"/>
+        </div>
+        <div>
+          <label for="f-email" class="mono-label text-muted block mb-2">Email *</label>
+          <input id="f-email" name="email" type="email" required class="field" placeholder="anna@firma.pl"/>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <label for="f-phone" class="mono-label text-muted block mb-2">Telefon</label>
+        <input id="f-phone" name="phone" type="tel" class="field" placeholder="+48 600 000 000"/>
+      </div>
+
+      <div class="mt-4">
+        <label for="f-desc" class="mono-label text-muted block mb-2">Opis projektu *</label>
+        <textarea id="f-desc" name="desc" rows="5" required class="field resize-y" placeholder="Co chcesz wydrukować? Wymiary, materiał, ilość, deadline..."></textarea>
+      </div>
+
+      <!-- Dropzone -->
+      <div class="mt-8">
+        <label class="mono-label text-muted block mb-3 text-center">Wgraj plik 3D</label>
+        <div id="dropzone" class="dropzone-hex" tabindex="0" role="button" aria-label="Przeciągnij plik lub kliknij aby wybrać">
+          <svg class="hex-svg" viewBox="0 0 200 174" preserveAspectRatio="none" aria-hidden="true">
+            <path class="hex-stroke" d="M100 4 L194 51 L194 123 L100 170 L6 123 L6 51 Z"/>
+          </svg>
+          <div class="hex-content">
+            <div class="hex-glyph text-ink mb-3">
+              <svg width="40" height="44" viewBox="0 0 40 44" fill="none" aria-hidden="true">
+                <path d="M20 2 L36 11 L36 33 L20 42 L4 33 L4 11 Z" stroke="currentColor" stroke-width="1.6" fill="none"/>
+                <path d="M20 14 L20 30 M14 22 L20 14 L26 22" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+            </div>
+            <div id="dz-text" class="font-display font-semibold text-[15px] md:text-[16px] text-ink">Przeciągnij plik lub kliknij aby wybrać</div>
+            <div class="mono-label text-muted mt-2">[ STL · STEP · STP · OBJ · 3MF · max 20 MB ]</div>
+          </div>
+          <input id="fileInput" type="file" class="absolute inset-0 opacity-0 cursor-pointer" accept=".stl,.step,.stp,.obj,.3mf"/>
+        </div>
+      </div>
+
+      <!-- Consent -->
+      <label class="mt-7 flex items-start gap-3 cursor-pointer select-none">
+        <input id="f-consent" type="checkbox" required class="mt-[3px] w-[18px] h-[18px] accent-accent border-border rounded"/>
+        <span class="text-[14px] text-muted leading-[1.55]">Akceptuję <a href="#" class="text-ink underline underline-offset-2 hover:text-accent">politykę prywatności</a> i wyrażam zgodę na kontakt.</span>
+      </label>
+
+      <button type="submit" class="btn btn-accent w-full mt-7 rounded-full h-14 text-[16px] font-medium">
+        Wyślij brief
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+      </button>
+
+      <p id="formStatus" class="mt-4 text-center text-[14px] text-muted hidden"></p>
+    </form>
+
+    <!-- trust signals -->
+    <div class="max-w-[640px] mx-auto mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 reveal">
+      <div class="flex items-center gap-3 justify-center sm:justify-start">
+        <svg width="32" height="36" viewBox="0 0 32 36" aria-hidden="true">
+          <path d="M16 2 L29 9.5 L29 26.5 L16 34 L3 26.5 L3 9.5 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.3"/>
+          <g transform="translate(16 18)" stroke="#0A0A0A" stroke-width="1.4" fill="none" stroke-linecap="round">
+            <rect x="-4" y="-1" width="8" height="6" rx="1"/>
+            <path d="M-2.5 -1 V -3 a 2.5 2.5 0 0 1 5 0 V -1"/>
+          </g>
+        </svg>
+        <div>
+          <div class="font-display font-semibold text-[14px]">Pliki tylko dla nas</div>
+          <div class="mono-label text-muted">NDA na żądanie</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 justify-center sm:justify-start">
+        <svg width="32" height="36" viewBox="0 0 32 36" aria-hidden="true">
+          <path d="M16 2 L29 9.5 L29 26.5 L16 34 L3 26.5 L3 9.5 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.3"/>
+          <path d="M17 11 L11 20 H 16 L 14 25 L 21 16 H 16 Z" fill="#0A0A0A" stroke="#0A0A0A" stroke-width="1" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <div class="font-display font-semibold text-[14px]">Wycena w 24h</div>
+          <div class="mono-label text-muted">Pon–Pt</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 justify-center sm:justify-start">
+        <svg width="32" height="36" viewBox="0 0 32 36" aria-hidden="true">
+          <path d="M16 2 L29 9.5 L29 26.5 L16 34 L3 26.5 L3 9.5 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.3"/>
+          <path d="M10 18 L14.5 22.5 L22 14" stroke="#0A0A0A" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <div class="font-display font-semibold text-[14px]">Bez zobowiązań</div>
+          <div class="mono-label text-muted">Akceptujesz wycenę</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 05 — FAQ ============================ -->
+<section id="faq" class="py-24 md:py-32">
+  <div class="max-w-4xl mx-auto px-5 md:px-8">
+    <div class="mb-12 md:mb-16 reveal">
+      <div class="section-eyebrow mb-4">05 / FAQ</div>
+      <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Pytania, które dostajemy najczęściej</h2>
+    </div>
+
+    <div class="border-t border-border reveal">
+      <!-- faq items injected as static markup -->
+      <article class="faq-item border-b border-border" aria-expanded="false">
+        <button class="faq-trigger w-full flex items-center justify-between gap-6 py-6 md:py-7 text-left">
+          <span class="text-[17px] md:text-[18px] font-medium pr-4">Jakie formaty plików przyjmujecie?</span>
+          <span class="faq-toggle relative w-7 h-7 flex-shrink-0 faq-icon text-ink">
+            <span class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1.5px] bg-current"></span>
+            <span class="bar-v absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1.5px] bg-current transition-all duration-300"></span>
+          </span>
+        </button>
+        <div class="faq-body">
+          <div>
+            <p class="text-muted text-[15px] md:text-[16px] leading-[1.65] pb-7 pr-10 max-w-3xl">
+              Standardowo przyjmujemy <span class="font-mono text-ink">STL, STEP, STP, OBJ</span> oraz <span class="font-mono text-ink">3MF</span>. Akceptujemy też pliki źródłowe z Fusion 360, Blendera czy SolidWorks — wtedy doprojektowujemy pod konkretną technologię druku.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <article class="faq-item border-b border-border" aria-expanded="false">
+        <button class="faq-trigger w-full flex items-center justify-between gap-6 py-6 md:py-7 text-left">
+          <span class="text-[17px] md:text-[18px] font-medium pr-4">Ile trwa realizacja zamówienia?</span>
+          <span class="faq-toggle relative w-7 h-7 flex-shrink-0 faq-icon text-ink">
+            <span class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1.5px] bg-current"></span>
+            <span class="bar-v absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1.5px] bg-current transition-all duration-300"></span>
+          </span>
+        </button>
+        <div class="faq-body">
+          <div>
+            <p class="text-muted text-[15px] md:text-[16px] leading-[1.65] pb-7 pr-10 max-w-3xl">
+              Wycena zwykle wraca w ciągu 24h. Sam druk pojedynczego obiektu to 1–3 dni, prototyp z modelowaniem 3–7 dni, mała seria do 2 tygodni. Termin uzgadniamy zawsze indywidualnie po obejrzeniu pliku.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <article class="faq-item border-b border-border" aria-expanded="false">
+        <button class="faq-trigger w-full flex items-center justify-between gap-6 py-6 md:py-7 text-left">
+          <span class="text-[17px] md:text-[18px] font-medium pr-4">W jakich materiałach drukujecie?</span>
+          <span class="faq-toggle relative w-7 h-7 flex-shrink-0 faq-icon text-ink">
+            <span class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1.5px] bg-current"></span>
+            <span class="bar-v absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1.5px] bg-current transition-all duration-300"></span>
+          </span>
+        </button>
+        <div class="faq-body">
+          <div>
+            <p class="text-muted text-[15px] md:text-[16px] leading-[1.65] pb-7 pr-10 max-w-3xl">
+              FDM: <span class="font-mono text-ink">PLA, PLA+, PETG, ABS, ASA, TPU, PA-CF</span>. SLA: żywice standard, tough, castable do biżuterii i dental-like. Dobieramy materiał pod zastosowanie — temperaturę pracy, elastyczność, kontakt z żywnością.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <article class="faq-item border-b border-border" aria-expanded="false">
+        <button class="faq-trigger w-full flex items-center justify-between gap-6 py-6 md:py-7 text-left">
+          <span class="text-[17px] md:text-[18px] font-medium pr-4">Czy mogę zamówić jedną sztukę?</span>
+          <span class="faq-toggle relative w-7 h-7 flex-shrink-0 faq-icon text-ink">
+            <span class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1.5px] bg-current"></span>
+            <span class="bar-v absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1.5px] bg-current transition-all duration-300"></span>
+          </span>
+        </button>
+        <div class="faq-body">
+          <div>
+            <p class="text-muted text-[15px] md:text-[16px] leading-[1.65] pb-7 pr-10 max-w-3xl">
+              Jasne. Druk 3D jest stworzony do produkcji jednostkowej — replika części, prezent, prototyp. Bez minimum zamówienia, bez setupów, bez "od 50 sztuk". Płacisz za czas druku, materiał i ewentualne wykończenie.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <article class="faq-item border-b border-border" aria-expanded="false">
+        <button class="faq-trigger w-full flex items-center justify-between gap-6 py-6 md:py-7 text-left">
+          <span class="text-[17px] md:text-[18px] font-medium pr-4">Co z poufnością projektów (NDA)?</span>
+          <span class="faq-toggle relative w-7 h-7 flex-shrink-0 faq-icon text-ink">
+            <span class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1.5px] bg-current"></span>
+            <span class="bar-v absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1.5px] bg-current transition-all duration-300"></span>
+          </span>
+        </button>
+        <div class="faq-body">
+          <div>
+            <p class="text-muted text-[15px] md:text-[16px] leading-[1.65] pb-7 pr-10 max-w-3xl">
+              Podpisujemy NDA bez problemu — wzór gotowy do wglądu na życzenie. Pliki klientów nie trafiają na social media ani do portfolio bez wyraźnej zgody. Materiał poprodukcyjny utylizujemy.
+            </p>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="bg-ink text-white pt-20 pb-10">
+  <div class="max-w-7xl mx-auto px-5 md:px-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
+      <div>
+        <div class="flex items-center gap-3 mb-5">
+          <img src="assets/hsz-logo.png" alt="HSZ Design" width="64" height="64" class="w-16 h-16 object-contain invert"/>
+        </div>
+        <p class="text-white/60 text-[14px] leading-[1.6] max-w-xs">Studio druku 3D — modelujemy, drukujemy, wykańczamy.</p>
+        <a href="#" class="inline-flex items-center gap-2 mt-5 text-[14px] hover:text-accent transition-colors">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+          @hsz.design
+        </a>
+      </div>
+
+      <div>
+        <div class="mono-label text-white/40 mb-5">Nawigacja</div>
+        <ul class="space-y-3 text-[14px]">
+          <li><a href="#uslugi"     class="text-white/80 hover:text-white transition-colors">Usługi</a></li>
+          <li><a href="#realizacje" class="text-white/80 hover:text-white transition-colors">Realizacje</a></li>
+          <li><a href="#brief"      class="text-white/80 hover:text-white transition-colors">Brief</a></li>
+          <li><a href="#faq"        class="text-white/80 hover:text-white transition-colors">FAQ</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="mono-label text-white/40 mb-5">Kontakt</div>
+        <ul class="space-y-3 text-[14px]">
+          <li><a href="mailto:hello@hsz.design" class="text-white/80 hover:text-accent transition-colors">hello@hsz.design</a></li>
+          <li><a href="tel:+48000000000"        class="text-white/80 hover:text-white transition-colors font-mono">+48 ___ ___ ___</a></li>
+          <li class="text-white/60">Polska</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="mono-label text-white/40 mb-5">Prawne</div>
+        <ul class="space-y-3 text-[14px]">
+          <li><a href="#" class="text-white/80 hover:text-white transition-colors">Polityka prywatności</a></li>
+          <li><a href="#" class="text-white/80 hover:text-white transition-colors">Regulamin</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="mono-label text-white/40">© 2026 HSZ Design. Wszystkie prawa zastrzeżone.</p>
+      <svg width="22" height="22" viewBox="0 0 40 40" fill="none" aria-hidden="true" class="opacity-40">
+        <path d="M20 2 L35.6 11 L35.6 29 L20 38 L4.4 29 L4.4 11 Z" stroke="#FFFFFF" stroke-width="1.6" fill="none"/>
+      </svg>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+  // ---------- Mobile menu ----------
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  menuBtn.addEventListener('click', () => {
+    const open = !mobileMenu.classList.contains('hidden');
+    if (open) {
+      mobileMenu.classList.add('hidden');
+      menuBtn.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('menu-open');
+    } else {
+      mobileMenu.classList.remove('hidden');
+      menuBtn.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('menu-open');
+    }
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mobileMenu.classList.add('hidden');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('menu-open');
+  }));
+
+  // ---------- FAQ accordion ----------
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const btn = item.querySelector('.faq-trigger');
+    btn.addEventListener('click', () => {
+      const isOpen = item.getAttribute('aria-expanded') === 'true';
+      // close others
+      document.querySelectorAll('.faq-item').forEach(other => {
+        if (other !== item) other.setAttribute('aria-expanded', 'false');
+      });
+      item.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+    });
+  });
+
+  // ---------- Dropzone ----------
+  const dz       = document.getElementById('dropzone');
+  const dzText   = document.getElementById('dz-text');
+  const fileInput= document.getElementById('fileInput');
+
+  ['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, ev => {
+    ev.preventDefault(); ev.stopPropagation();
+    dz.classList.add('is-drag');
+  }));
+  ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, ev => {
+    ev.preventDefault(); ev.stopPropagation();
+    dz.classList.remove('is-drag');
+  }));
+  dz.addEventListener('drop', ev => {
+    const f = ev.dataTransfer.files?.[0];
+    if (f) handleFile(f);
+  });
+  fileInput.addEventListener('change', () => {
+    const f = fileInput.files?.[0];
+    if (f) handleFile(f);
+  });
+
+  function handleFile(f) {
+    const sizeMB = (f.size / (1024*1024)).toFixed(1);
+    dzText.innerHTML = `<span class="text-accent">⬡</span> ${f.name} <span class="font-mono text-muted">· ${sizeMB} MB</span>`;
+  }
+
+  // Allow keyboard activation of dropzone
+  dz.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fileInput.click();
+    }
+  });
+
+  // ---------- Form submit ----------
+  const form = document.getElementById('briefForm');
+  const status = document.getElementById('formStatus');
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    status.textContent = '✓ Dzięki! Wracamy z wyceną w ciągu 24h.';
+    status.classList.remove('hidden');
+    status.classList.remove('text-muted');
+    status.classList.add('text-accent', 'font-medium');
+    form.querySelector('button[type="submit"]').disabled = true;
+  });
+
+  // ---------- Reveal on scroll ----------
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        en.target.classList.add('is-in');
+        io.unobserve(en.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
