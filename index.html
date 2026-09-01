@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>HSZ Design – Studio druku 3D</title>
-<meta name="description" content="HSZ Design – polskie studio modelowania i druku 3D na zamówienie. Wyceniamy w 24h." />
+<meta name="description" content="HSZ Design – polskie studio modelowania, druku i skanowania 3D na zamówienie. Wyceniamy w 48h." />
 
 <link rel="icon" type="image/png" href="assets/hsz-logo.png" />
 <link rel="apple-touch-icon" href="assets/hsz-logo.png" />
@@ -19,13 +19,13 @@
     theme: {
       extend: {
         colors: {
-          bg:           '#FAFAFA',
-          surface:      '#FFFFFF',
-          ink:          '#0A0A0A',
-          muted:        '#737373',
-          border:       '#E5E5E5',
-          accent:       '#0A0A0A',
-          'accent-dark':'#404040',
+          bg:           'var(--c-bg)',
+          surface:      'var(--c-surface)',
+          ink:          'var(--c-ink)',
+          muted:        'var(--c-muted)',
+          border:       'var(--c-border)',
+          accent:       'var(--c-ink)',
+          'accent-dark':'var(--c-accent-dark)',
         },
         fontFamily: {
           display: ['"Space Grotesk"', 'sans-serif'],
@@ -40,21 +40,59 @@
     },
   };
 </script>
+<script>
+  // Ustaw motyw przed pierwszym malowaniem strony (bez migotania)
+  (function () {
+    try {
+      const saved = localStorage.getItem('hsz-theme');
+      const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      if (theme === 'dark') document.documentElement.classList.add('dark');
+    } catch (_) {}
+  })();
+</script>
 
 <style>
+  :root {
+    --c-bg: #FAFAFA;
+    --c-surface: #FFFFFF;
+    --c-surface-hover: #F5F5F5;
+    --c-surface-alt: #F0F0F0;
+    --c-ink: #0A0A0A;
+    --c-muted: #737373;
+    --c-border: #E5E5E5;
+    --c-border-hover: #D4D4D4;
+    --c-accent-dark: #404040;
+    --c-nav-blur: rgba(255,255,255,0.78);
+    --c-hex-stroke: %230A0A0A;
+  }
+  html.dark {
+    --c-bg: #0A0A0A;
+    --c-surface: #141414;
+    --c-surface-hover: #1D1D1D;
+    --c-surface-alt: #1A1A1A;
+    --c-ink: #FAFAFA;
+    --c-muted: #A3A3A3;
+    --c-border: #2A2A2A;
+    --c-border-hover: #3A3A3A;
+    --c-accent-dark: #D4D4D4;
+    --c-nav-blur: rgba(10,10,10,0.78);
+    --c-hex-stroke: %23FAFAFA;
+  }
+
   html { scroll-behavior: smooth; }
   body {
     font-family: 'Inter', sans-serif;
-    background: #FAFAFA;
-    color: #0A0A0A;
+    background: var(--c-bg);
+    color: var(--c-ink);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    transition: background-color .3s ease, color .3s ease;
   }
-  ::selection { background: #0A0A0A; color: #fff; }
+  ::selection { background: var(--c-ink); color: var(--c-bg); }
 
   /* Hex background pattern */
   .hex-grid-bg {
-    background-color: #FAFAFA;
+    background-color: var(--c-bg);
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='64' viewBox='0 0 56 64'><g fill='none' stroke='%230A0A0A' stroke-width='1'><path d='M28 1 L55 16 L55 48 L28 63 L1 48 L1 16 Z'/></g></svg>");
     background-size: 56px 64px;
     background-position: 0 0;
@@ -67,6 +105,10 @@
     background-size: 56px 64px;
     opacity: 0.04;
     pointer-events:none;
+  }
+  html.dark .hex-grid-overlay::before{
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='64' viewBox='0 0 56 64'><g fill='none' stroke='%23FAFAFA' stroke-width='1'><path d='M28 1 L55 16 L55 48 L28 63 L1 48 L1 16 Z'/></g></svg>");
+    opacity: 0.05;
   }
 
   /* Hex clip-path */
@@ -113,30 +155,35 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; padding: 1.5rem;
   }
-  .dropzone-hex .hex-stroke { stroke: #0A0A0A; stroke-width: 1.5; fill: #FFFFFF; transition: all .25s ease; stroke-dasharray: 6 6; }
-  .dropzone-hex.is-drag .hex-stroke { stroke: #0A0A0A; stroke-width: 2.5; fill: #F0F0F0; }
-  .dropzone-hex.is-drag .hex-glyph { color: #0A0A0A; transform: scale(1.06); }
+  .dropzone-hex .hex-stroke { stroke: var(--c-ink); stroke-width: 1.5; fill: var(--c-surface); transition: all .25s ease; stroke-dasharray: 6 6; }
+  .dropzone-hex.is-drag .hex-stroke { stroke: var(--c-ink); stroke-width: 2.5; fill: var(--c-surface-alt); }
+  .dropzone-hex.is-drag .hex-glyph { color: var(--c-ink); transform: scale(1.06); }
   .dropzone-hex .hex-glyph { transition: all .25s ease; }
-  .dropzone-hex:hover .hex-stroke { stroke: #0A0A0A; fill: #F5F5F5; }
-  .dropzone-hex:focus-within .hex-stroke { stroke: #0A0A0A; }
+  .dropzone-hex:hover .hex-stroke { stroke: var(--c-ink); fill: var(--c-surface-hover); }
+  .dropzone-hex:focus-within .hex-stroke { stroke: var(--c-ink); }
 
   /* FAQ */
   .faq-item[aria-expanded="true"] .faq-toggle .bar-v { transform: rotate(90deg); opacity: 0; }
-  .faq-item[aria-expanded="true"] .faq-icon { color: #0A0A0A; }
+  .faq-item[aria-expanded="true"] .faq-icon { color: var(--c-ink); }
   .faq-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s ease; }
   .faq-item[aria-expanded="true"] .faq-body { grid-template-rows: 1fr; }
   .faq-body > div { overflow: hidden; }
 
   /* Service card hex icon hover */
-  .svc-card:hover .svc-hex { fill: #F0F0F0; }
-  .svc-card:hover .svc-hex-stroke { stroke: #0A0A0A; }
+  .svc-card:hover { background: var(--c-surface-hover); }
+  .svc-card:hover .svc-hex { fill: var(--c-surface-alt); }
+  .svc-card:hover .svc-hex-stroke { stroke: var(--c-ink); }
+
+  /* Decorative line-art SVGs: flip black/white for dark mode */
+  html.dark .ink-svg { filter: invert(1); }
+  html.dark .logo-invertable { filter: invert(1); }
 
   /* Focus rings */
-  :focus-visible { outline: 2px solid #0A0A0A; outline-offset: 2px; border-radius: 4px; }
+  :focus-visible { outline: 2px solid var(--c-ink); outline-offset: 2px; border-radius: 4px; }
 
   /* Nav blur */
   .nav-blur {
-    background: rgba(255,255,255,0.78);
+    background: var(--c-nav-blur);
     backdrop-filter: saturate(180%) blur(12px);
     -webkit-backdrop-filter: saturate(180%) blur(12px);
   }
@@ -149,7 +196,7 @@
   .hero-hex-float { animation: floaty 6s ease-in-out infinite; transform-origin: center; }
 
   /* Stats divider */
-  .stat-divider + .stat-divider { border-left: 1px solid #E5E5E5; }
+  .stat-divider + .stat-divider { border-left: 1px solid var(--c-border); }
 
   /* Mono label */
   .mono-label {
@@ -169,26 +216,33 @@
 
   /* Buttons */
   .btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-weight:500; transition: all .2s ease; }
-  .btn-accent { background:#0A0A0A; color:#fff; }
-  .btn-accent:hover { background:#404040; transform: translateY(-1px); box-shadow: 0 8px 24px -8px rgba(10,10,10,.35); }
-  .btn-ghost  { border:1px solid #0A0A0A; color:#0A0A0A; background:transparent; }
-  .btn-ghost:hover { background:#0A0A0A; color:#fff; }
+  .btn-accent { background: var(--c-ink); color: var(--c-bg); }
+  .btn-accent:hover { background: var(--c-accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px -8px rgba(10,10,10,.35); }
+  .btn-ghost  { border:1px solid var(--c-ink); color: var(--c-ink); background:transparent; }
+  .btn-ghost:hover { background: var(--c-ink); color: var(--c-bg); }
+
+  /* Theme toggle */
+  .theme-toggle { border:1px solid var(--c-border); color: var(--c-ink); background: transparent; transition: all .2s ease; }
+  .theme-toggle:hover { background: var(--c-surface-hover); border-color: var(--c-border-hover); }
+  .theme-toggle .icon-moon { display: none; }
+  html.dark .theme-toggle .icon-sun { display: none; }
+  html.dark .theme-toggle .icon-moon { display: block; }
 
   /* Input styles */
   .field {
     width:100%;
-    background:#fff;
-    border:1px solid #E5E5E5;
+    background: var(--c-surface);
+    border:1px solid var(--c-border);
     border-radius: 6px;
     padding: 14px 16px;
     font-family: 'Inter', sans-serif;
     font-size: 15px;
-    color: #0A0A0A;
-    transition: border-color .2s ease, box-shadow .2s ease;
+    color: var(--c-ink);
+    transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
   }
-  .field::placeholder { color: #A3A3A3; }
-  .field:focus { outline: none; border-color: #0A0A0A; box-shadow: 0 0 0 3px rgba(10,10,10,.06); }
-  .field:hover { border-color: #D4D4D4; }
+  .field::placeholder { color: var(--c-muted); }
+  .field:focus { outline: none; border-color: var(--c-ink); box-shadow: 0 0 0 3px rgba(115,115,115,.15); }
+  .field:hover { border-color: var(--c-border-hover); }
 
   /* Section number */
   .section-eyebrow {
@@ -197,15 +251,15 @@
     font-size: 13px;
     letter-spacing: .18em;
     text-transform: uppercase;
-    color: #0A0A0A;
+    color: var(--c-ink);
     font-weight: 500;
   }
-  .section-eyebrow::before { content: ""; display:inline-block; width:24px; height:1px; background:#0A0A0A; }
+  .section-eyebrow::before { content: ""; display:inline-block; width:24px; height:1px; background: var(--c-ink); }
 
   /* Slight underline anim on nav links */
   .nav-link { position: relative; }
   .nav-link::after {
-    content: ""; position: absolute; left: 0; bottom: -4px; height: 1.5px; width: 0; background: #0A0A0A;
+    content: ""; position: absolute; left: 0; bottom: -4px; height: 1.5px; width: 0; background: var(--c-ink);
     transition: width .25s ease;
   }
   .nav-link:hover::after { width: 100%; }
@@ -217,7 +271,7 @@
 <header class="sticky top-0 z-50 nav-blur border-b border-border">
   <div class="max-w-7xl mx-auto px-5 md:px-8 h-16 md:h-[72px] flex items-center justify-between">
     <a href="#top" class="flex items-center gap-2 group" aria-label="HSZ Design – strona główna">
-      <img src="assets/hsz-logo.png" alt="HSZ Design" width="48" height="48" class="w-12 h-12 object-contain"/>
+      <img src="assets/hsz-logo.png" alt="HSZ Design" width="48" height="48" class="logo-invertable w-12 h-12 object-contain"/>
       <span class="sr-only">HSZ Design</span>
     </a>
 
@@ -226,17 +280,27 @@
       <a href="#realizacje"class="nav-link text-[14px] text-ink/80 hover:text-ink">Realizacje</a>
       <a href="#proces"    class="nav-link text-[14px] text-ink/80 hover:text-ink">Proces</a>
       <a href="#faq"       class="nav-link text-[14px] text-ink/80 hover:text-ink">FAQ</a>
+      <button id="themeToggle" type="button" class="theme-toggle w-10 h-10 rounded-full flex items-center justify-center" aria-label="Przełącz tryb ciemny" aria-pressed="false">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+      </button>
       <a href="#brief"     class="btn btn-accent rounded-full px-5 py-2.5 text-[14px]">
         Złóż brief
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
       </a>
     </nav>
 
-    <button id="menuBtn" class="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-[5px]" aria-label="Otwórz menu" aria-expanded="false">
-      <span class="block w-5 h-[1.5px] bg-ink transition-transform"></span>
-      <span class="block w-5 h-[1.5px] bg-ink transition-opacity"></span>
-      <span class="block w-5 h-[1.5px] bg-ink transition-transform"></span>
-    </button>
+    <div class="md:hidden flex items-center gap-2">
+      <button id="themeToggleMobile" type="button" class="theme-toggle w-10 h-10 rounded-full flex items-center justify-center" aria-label="Przełącz tryb ciemny" aria-pressed="false">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+      </button>
+      <button id="menuBtn" class="w-10 h-10 flex flex-col items-center justify-center gap-[5px]" aria-label="Otwórz menu" aria-expanded="false">
+        <span class="block w-5 h-[1.5px] bg-ink transition-transform"></span>
+        <span class="block w-5 h-[1.5px] bg-ink transition-opacity"></span>
+        <span class="block w-5 h-[1.5px] bg-ink transition-transform"></span>
+      </button>
+    </div>
   </div>
 
   <!-- Mobile menu -->
@@ -268,11 +332,11 @@
         <div class="section-eyebrow mb-6">Studio druku 3D</div>
 
         <h1 class="font-display font-bold text-[44px] sm:text-[56px] md:text-[68px] lg:text-[78px] leading-[1.04] tracking-[-0.025em]">
-          Modelujemy<br/>
-          i drukujemy<br/>
+          Modelujemy,<br/>
+          drukujemy i skanujemy<br/>
           <span class="relative inline-block">
             obiekty
-            <svg class="absolute -bottom-3 left-0 w-full" height="10" viewBox="0 0 200 10" preserveAspectRatio="none" aria-hidden="true">
+            <svg class="absolute -bottom-3 left-0 w-full ink-svg" height="10" viewBox="0 0 200 10" preserveAspectRatio="none" aria-hidden="true">
               <path d="M2 7 Q 50 1, 100 5 T 198 5" stroke="#0A0A0A" stroke-width="3" fill="none" stroke-linecap="round"/>
             </svg>
           </span>
@@ -280,7 +344,7 @@
         </h1>
 
         <p class="mt-8 max-w-xl text-[18px] md:text-[20px] leading-[1.6] text-muted">
-          Projektujemy pod druk 3D i wykonujemy realizacje – od jednostkowych prezentów po prototypy dla firm. Wyślij plik lub pomysł, wracamy z wyceną w 24h.
+          Projektujemy pod druk 3D i wykonujemy realizacje – od jednostkowych prezentów, przez projekty użytkowe, aż po małoseryjne prototypy dla firm. Wyślij plik lub pomysł, wracamy z wyceną w 48h.
         </p>
 
         <div class="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -305,7 +369,7 @@
       <div class="lg:col-span-5 reveal">
         <div class="relative mx-auto w-full max-w-[460px] aspect-square">
           <!-- big hex frame -->
-          <svg viewBox="0 0 400 400" class="w-full h-full hero-hex-float" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <svg viewBox="0 0 400 400" class="w-full h-full hero-hex-float ink-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <pattern id="hexpat" x="0" y="0" width="28" height="32" patternUnits="userSpaceOnUse">
                 <path d="M14 1 L27 8 L27 24 L14 31 L1 24 L1 8 Z" fill="none" stroke="#0A0A0A" stroke-width="0.5" opacity="0.25"/>
@@ -356,10 +420,10 @@
 
           <!-- floating mono badges -->
           <div class="absolute -left-2 top-12 hidden md:flex bg-surface border border-border rounded-full px-3 py-1.5 mono-label text-ink shadow-sm">
-            ⬡ FDM · SLA
+            ⬡ FDM · Skan 3D
           </div>
-          <div class="absolute -right-2 bottom-12 hidden md:flex bg-ink text-white rounded-full px-3 py-1.5 mono-label shadow-sm">
-            24h · Wycena
+          <div class="absolute -right-2 bottom-12 hidden md:flex bg-ink text-bg rounded-full px-3 py-1.5 mono-label shadow-sm">
+            48h · Wycena
           </div>
         </div>
       </div>
@@ -370,7 +434,7 @@
   <div class="border-y border-border bg-surface">
     <div class="max-w-7xl mx-auto px-5 md:px-8 grid grid-cols-2 md:grid-cols-4">
       <div class="stat-divider py-7 md:py-9 px-2 md:px-6 md:border-l md:border-border first:border-l-0">
-        <div class="font-mono text-[28px] md:text-[32px] font-medium text-ink leading-none">120<span class="text-accent">+</span></div>
+        <div class="font-mono text-[28px] md:text-[32px] font-medium text-ink leading-none">90<span class="text-accent">+</span></div>
         <div class="mono-label text-muted mt-2">Zrealizowanych projektów</div>
       </div>
       <div class="stat-divider py-7 md:py-9 px-2 md:px-6 border-l border-border">
@@ -378,11 +442,11 @@
         <div class="mono-label text-muted mt-2">Średni czas wyceny</div>
       </div>
       <div class="stat-divider py-7 md:py-9 px-2 md:px-6 border-l border-border md:border-l md:border-border border-t md:border-t-0">
-        <div class="font-mono text-[28px] md:text-[32px] font-medium text-ink leading-none">12</div>
+        <div class="font-mono text-[28px] md:text-[32px] font-medium text-ink leading-none">11</div>
         <div class="mono-label text-muted mt-2">Materiałów w ofercie</div>
       </div>
       <div class="stat-divider py-7 md:py-9 px-2 md:px-6 border-l border-border border-t md:border-t-0">
-        <div class="font-mono text-[28px] md:text-[32px] font-medium text-ink leading-none">5<span class="text-accent">★</span></div>
+        <div class="font-mono text-[28px] md:text-[32px] font-medium text-ink leading-none">4,9<span class="text-accent">★</span></div>
         <div class="mono-label text-muted mt-2">Średnia ocena</div>
       </div>
     </div>
@@ -397,14 +461,14 @@
         <div class="section-eyebrow mb-4">Co robimy</div>
         <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Usługi</h2>
       </div>
-      <p class="text-muted text-[16px] md:max-w-sm">Pełny stos: od pomysłu i modelu, przez druk różnymi technologiami, po wykończenie i małe serie.</p>
+      <p class="text-muted text-[16px] md:max-w-sm">Skontaktuj się z Twoją potrzebą – od pomysłu na jej zaspokojenie, przez doradztwo techniczne, skan i model, druk różnymi technologiami, po wykończenie i małe serie.</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
       <!-- card 1 -->
-      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors hover:bg-[#F5F5F5] reveal">
+      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors reveal">
         <div class="mb-7">
-          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" class="ink-svg" aria-hidden="true">
             <path class="svc-hex svc-hex-stroke" d="M28 4 L48 16 L48 40 L28 52 L8 40 L8 16 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.4"/>
             <!-- pen/vector glyph -->
             <g transform="translate(28 28)" stroke="#0A0A0A" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -416,14 +480,14 @@
           </svg>
         </div>
         <h3 class="font-display font-bold text-[20px] mb-2.5">Modelowanie 3D</h3>
-        <p class="text-muted text-[15px] leading-[1.6]">Tworzymy modele od zera lub na podstawie szkicu, zdjęcia, pomiarów.</p>
-        <div class="mt-5 mono-label text-muted">Blender · Fusion · ZBrush</div>
+        <p class="text-muted text-[15px] leading-[1.6]">Tworzymy modele od zera lub na podstawie szkicu, zdjęcia, pomiarów, skanu 3D.</p>
+        <div class="mt-5 mono-label text-muted">Blender · Fusion360 · Shapr3D</div>
       </article>
 
       <!-- card 2 -->
-      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors hover:bg-[#F5F5F5] reveal">
+      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors reveal">
         <div class="mb-7">
-          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" class="ink-svg" aria-hidden="true">
             <path class="svc-hex svc-hex-stroke" d="M28 4 L48 16 L48 40 L28 52 L8 40 L8 16 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.4"/>
             <g transform="translate(28 28)" stroke="#0A0A0A" stroke-width="1.5" fill="none" stroke-linecap="round">
               <!-- filament spool -->
@@ -435,31 +499,34 @@
           </svg>
         </div>
         <h3 class="font-display font-bold text-[20px] mb-2.5">Druk FDM</h3>
-        <p class="text-muted text-[15px] leading-[1.6]">Filament PLA, PETG, ABS, TPU. Duże gabaryty, prototypy, użytkowe części.</p>
-        <div class="mt-5 mono-label text-muted">Do 300×300×400 mm</div>
+        <p class="text-muted text-[15px] leading-[1.6]">Filamenty PLA, PETG, ABS, ASA, TPU oraz HT i techniczne – także w kombinacjach kolorystycznych i materiałowych. Prototypy, części użytkowe, elementy dekoracyjne i promocyjne, aż po zastosowania przemysłowe i automotive.</p>
+        <div class="mt-5 mono-label text-muted">Do 350 × 320 × 325 mm bez spajania</div>
+        <div class="mt-1 text-muted text-[12.5px] leading-[1.5]">Potrzebujesz większych wymiarów? Daj znać, zaradzimy!</div>
       </article>
 
       <!-- card 3 -->
-      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors hover:bg-[#F5F5F5] reveal">
+      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors reveal">
         <div class="mb-7">
-          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" class="ink-svg" aria-hidden="true">
             <path class="svc-hex svc-hex-stroke" d="M28 4 L48 16 L48 40 L28 52 L8 40 L8 16 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.4"/>
-            <g transform="translate(28 28)" stroke="#0A0A0A" stroke-width="1.5" fill="none" stroke-linecap="round">
-              <!-- droplet / resin -->
-              <path d="M0 -10 C 7 -2 7 6 0 10 C -7 6 -7 -2 0 -10 Z" fill="#FAFAFA"/>
-              <circle cx="-2" cy="3" r="1.5" fill="#0A0A0A" stroke="#0A0A0A"/>
+            <g transform="translate(28 28)" stroke="#0A0A0A" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <!-- 3D scanner: object + scan lines -->
+              <path d="M-8 8 L0 -9 L8 8 Z"/>
+              <line x1="-6.2" y1="3.5" x2="6.2" y2="3.5" stroke-dasharray="2 2"/>
+              <line x1="-4" y1="-2.5" x2="4" y2="-2.5" stroke-dasharray="2 2"/>
+              <circle cx="0" cy="-9" r="1.6" fill="#0A0A0A"/>
             </g>
           </svg>
         </div>
-        <h3 class="font-display font-bold text-[20px] mb-2.5">Druk żywiczny (SLA)</h3>
-        <p class="text-muted text-[15px] leading-[1.6]">Wysoka rozdzielczość, biżuteria, modele, drobny detal.</p>
-        <div class="mt-5 mono-label text-muted">25 µm warstwa</div>
+        <h3 class="font-display font-bold text-[20px] mb-2.5">Skan 3D</h3>
+        <p class="text-muted text-[15px] leading-[1.6]">Skan obiektu rzeczywistego z dokładnością do 0.03 mm, postprodukcja i budowa modelu 3D w oparciu o wykonany skan.</p>
+        <div class="mt-5 mono-label text-muted">Dokładność do 0.03 mm</div>
       </article>
 
       <!-- card 4 -->
-      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors hover:bg-[#F5F5F5] reveal">
+      <article class="svc-card group bg-surface rounded-2xl p-7 md:p-8 transition-colors reveal">
         <div class="mb-7">
-          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" class="ink-svg" aria-hidden="true">
             <path class="svc-hex svc-hex-stroke" d="M28 4 L48 16 L48 40 L28 52 L8 40 L8 16 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.4"/>
             <g transform="translate(28 28)" stroke="#0A0A0A" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <!-- brush -->
@@ -470,8 +537,8 @@
           </svg>
         </div>
         <h3 class="font-display font-bold text-[20px] mb-2.5">Custom & post-processing</h3>
-        <p class="text-muted text-[15px] leading-[1.6]">Malowanie, sklejanie, wykończenie, małe serie.</p>
-        <div class="mt-5 mono-label text-muted">Spray · Airbrush · Mont.</div>
+        <p class="text-muted text-[15px] leading-[1.6]">Postprodukcja – sklejanie, malowanie, wykończenie, dodanie pełnoprawnych gwintów i magnesów. Współpracujemy z profesjonalnymi lakierniami.</p>
+        <div class="mt-5 mono-label text-muted">Spray · Airbrush · Lakiernia</div>
       </article>
     </div>
   </div>
@@ -485,7 +552,7 @@
         <div class="section-eyebrow mb-4">Realizacje</div>
         <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Wybrane projekty</h2>
       </div>
-      <p class="text-muted text-[16px] md:max-w-sm">Przekrój ostatnich zleceń – od jednostek dla klientów indywidualnych po małe serie dla firm.</p>
+      <p class="text-muted text-[16px] md:max-w-sm">Przekrój wybranych zleceń – od jednostek dla klientów indywidualnych po małe serie dla firm.</p>
     </div>
 
     <div id="realizacje-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
@@ -515,8 +582,12 @@
         <div class="section-eyebrow mb-4">Proces</div>
         <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Jak pracujemy</h2>
       </div>
-      <p class="text-muted text-[16px] md:max-w-sm">Cztery kroki, jasne terminy, bez ukrytych kosztów. Komunikacja na każdym etapie.</p>
+      <p class="text-muted text-[16px] md:max-w-sm">Bez ukrytych kosztów – komunikacja na każdym etapie.</p>
     </div>
+
+    <p class="reveal text-muted text-[16px] md:text-[17px] leading-[1.75] max-w-3xl mb-14 md:mb-16">
+      Druk 3D zaspokaja wiele potrzeb – od niestandardowych rozwiązań dla rzeczy użytku codziennego, przez nietypowe wymiarowo istniejące elementy, aż po produkty znajdujące zastosowanie w motoryzacji czy przemyśle. Nie wiesz, czy druk 3D będzie dobrym rozwiązaniem? Śmiało – skontaktuj się! Chętnie doradzimy, zaproponujemy dodatkowe możliwości poprawiające użytkowość (wykorzystanie magnesów, fizycznych trwałych gwintów, pokrycie powłoką żywiczną i wiele więcej), a jeśli będziemy widzieć lepszą dla niego alternatywę – nawet jeśli sami się nią nie zajmujemy – doradzimy i polecimy wykonawcę :)
+    </p>
 
     <ol class="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-3 relative">
       <!-- 1 -->
@@ -526,7 +597,7 @@
         </div>
         <div class="md:max-w-[200px]">
           <h3 class="font-display font-bold text-[18px] mb-2">Brief</h3>
-          <p class="text-muted text-[14px] leading-[1.6]">Wysyłasz plik lub opisujesz pomysł.</p>
+          <p class="text-muted text-[14px] leading-[1.6]">Wysyłasz plik i/lub opisujesz pomysł. Śmiało, im więcej szczegółów tym lepiej!</p>
         </div>
         <!-- desktop arrow -->
         <div class="hidden md:block absolute right-0 top-3 -translate-x-[calc(100%+12px)] translate-x-[58px]"></div>
@@ -542,8 +613,8 @@
           <span class="font-mono text-[40px] md:text-[48px] text-accent leading-none font-medium">02</span>
         </div>
         <div class="md:max-w-[200px]">
-          <h3 class="font-display font-bold text-[18px] mb-2">Wycena</h3>
-          <p class="text-muted text-[14px] leading-[1.6]">Dostajesz cenę i termin w 24h.</p>
+          <h3 class="font-display font-bold text-[18px] mb-2">Pierwszy kontakt</h3>
+          <p class="text-muted text-[14px] leading-[1.6]">Omawiamy Twój pomysł, możliwości i alternatywy – po uzgodnieniu zakresu dostajesz cenę i termin w 48h.</p>
         </div>
       </li>
 
@@ -557,7 +628,7 @@
         </div>
         <div class="md:max-w-[200px]">
           <h3 class="font-display font-bold text-[18px] mb-2">Druk</h3>
-          <p class="text-muted text-[14px] leading-[1.6]">Realizujemy i informujemy o postępie.</p>
+          <p class="text-muted text-[14px] leading-[1.6]">Realizujemy i informujemy o postępie. Przy małej serii wykonujemy pojedynczą sztukę do akceptacji.</p>
         </div>
       </li>
 
@@ -571,7 +642,7 @@
         </div>
         <div class="md:max-w-[200px]">
           <h3 class="font-display font-bold text-[18px] mb-2">Wysyłka</h3>
-          <p class="text-muted text-[14px] leading-[1.6]">Pakujemy i wysyłamy kurierem.</p>
+          <p class="text-muted text-[14px] leading-[1.6]">Pakujemy i wysyłamy kurierem, lub umawiamy się na odbiór osobisty!</p>
         </div>
       </li>
     </ol>
@@ -590,8 +661,8 @@
   <div class="relative max-w-7xl mx-auto px-5 md:px-8">
     <div class="max-w-2xl mx-auto text-center mb-12 md:mb-16 reveal">
       <div class="section-eyebrow mb-4 justify-center inline-flex">Brief</div>
-      <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Zacznijmy projekt</h2>
-      <p class="mt-5 text-muted text-[17px] md:text-[18px] leading-[1.6]">Wypełnij krótki brief – wracamy z wyceną w 24 godziny.</p>
+      <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Zacznijmy nasz projekt!</h2>
+      <p class="mt-5 text-muted text-[17px] md:text-[18px] leading-[1.6]">Wypełnij krótki brief – wracamy z odpowiedzią w 48 godzin.</p>
     </div>
 
     <form id="briefForm" class="max-w-[640px] mx-auto reveal" novalidate>
@@ -654,7 +725,7 @@
     <!-- trust signals -->
     <div class="max-w-[640px] mx-auto mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 reveal">
       <div class="flex items-center gap-3 justify-center sm:justify-start">
-        <svg width="32" height="36" viewBox="0 0 32 36" aria-hidden="true">
+        <svg width="32" height="36" viewBox="0 0 32 36" class="ink-svg" aria-hidden="true">
           <path d="M16 2 L29 9.5 L29 26.5 L16 34 L3 26.5 L3 9.5 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.3"/>
           <g transform="translate(16 18)" stroke="#0A0A0A" stroke-width="1.4" fill="none" stroke-linecap="round">
             <rect x="-4" y="-1" width="8" height="6" rx="1"/>
@@ -667,23 +738,23 @@
         </div>
       </div>
       <div class="flex items-center gap-3 justify-center sm:justify-start">
-        <svg width="32" height="36" viewBox="0 0 32 36" aria-hidden="true">
+        <svg width="32" height="36" viewBox="0 0 32 36" class="ink-svg" aria-hidden="true">
           <path d="M16 2 L29 9.5 L29 26.5 L16 34 L3 26.5 L3 9.5 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.3"/>
           <path d="M17 11 L11 20 H 16 L 14 25 L 21 16 H 16 Z" fill="#0A0A0A" stroke="#0A0A0A" stroke-width="1" stroke-linejoin="round"/>
         </svg>
         <div>
-          <div class="font-display font-semibold text-[14px]">Wycena w 24h</div>
+          <div class="font-display font-semibold text-[14px]">Wycena w 48h</div>
           <div class="mono-label text-muted">Pon–Pt</div>
         </div>
       </div>
       <div class="flex items-center gap-3 justify-center sm:justify-start">
-        <svg width="32" height="36" viewBox="0 0 32 36" aria-hidden="true">
+        <svg width="32" height="36" viewBox="0 0 32 36" class="ink-svg" aria-hidden="true">
           <path d="M16 2 L29 9.5 L29 26.5 L16 34 L3 26.5 L3 9.5 Z" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.3"/>
           <path d="M10 18 L14.5 22.5 L22 14" stroke="#0A0A0A" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <div>
           <div class="font-display font-semibold text-[14px]">Bez zobowiązań</div>
-          <div class="mono-label text-muted">Akceptujesz wycenę</div>
+          <div class="mono-label text-muted">Wycena nic nie kosztuje!</div>
         </div>
       </div>
     </div>
@@ -728,7 +799,7 @@
         <div class="faq-body">
           <div>
             <p class="text-muted text-[15px] md:text-[16px] leading-[1.65] pb-7 pr-10 max-w-3xl">
-              Wycena zwykle wraca w ciągu 24h. Sam druk pojedynczego obiektu to 1–3 dni, prototyp z modelowaniem 3–7 dni, mała seria do 2 tygodni. Termin uzgadniamy zawsze indywidualnie po obejrzeniu pliku.
+              Wycena zwykle wraca w ciągu max 48h. Sam druk pojedynczego obiektu to 1–3 dni, prototyp z modelowaniem 3–7 dni, mała seria do 2 tygodni. Termin uzgadniamy zawsze indywidualnie.
             </p>
           </div>
         </div>
@@ -745,7 +816,7 @@
         <div class="faq-body">
           <div>
             <p class="text-muted text-[15px] md:text-[16px] leading-[1.65] pb-7 pr-10 max-w-3xl">
-              FDM: <span class="font-mono text-ink">PLA, PLA+, PETG, ABS, ASA, TPU, PA-CF</span>. SLA: żywice standard, tough, castable do biżuterii i dental-like. Dobieramy materiał pod zastosowanie – temperaturę pracy, elastyczność, kontakt z żywnością.
+              FDM: <span class="font-mono text-ink">PLA, PLA+, PETG, PET CF, ABS, ASA, TPU, PA-CF</span> i wiele więcej – cały czas się rozwijamy i testujemy nowe materiały, chcąc nadążyć za potrzebami! Dobieramy materiał pod zastosowanie – temperaturę pracy, elastyczność, narażenie na konkretne warunki pracy.
             </p>
           </div>
         </div>
@@ -779,7 +850,7 @@
         <div class="faq-body">
           <div>
             <p class="text-muted text-[15px] md:text-[16px] leading-[1.65] pb-7 pr-10 max-w-3xl">
-              Podpisujemy NDA bez problemu – wzór gotowy do wglądu na życzenie. Pliki klientów nie trafiają na social media ani do portfolio bez wyraźnej zgody. Materiał poprodukcyjny utylizujemy.
+              Podpisujemy NDA bez problemu – wzór gotowy do wglądu na życzenie. Mamy doświadczenie w podwykonawstwie, które wymagało od nas dyskrecji. Pliki klientów nie trafiają na social media ani do portfolio bez wyraźnej zgody. Materiał poprodukcyjny utylizujemy.
             </p>
           </div>
         </div>
@@ -789,15 +860,15 @@
 </section>
 
 <!-- ============================ FOOTER ============================ -->
-<footer class="bg-ink text-white pt-20 pb-10">
+<footer class="bg-[#0A0A0A] text-white pt-20 pb-10">
   <div class="max-w-7xl mx-auto px-5 md:px-8">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
       <div>
         <div class="flex items-center gap-3 mb-5">
           <img src="assets/hsz-logo.png" alt="HSZ Design" width="64" height="64" class="w-16 h-16 object-contain invert"/>
         </div>
-        <p class="text-white/60 text-[14px] leading-[1.6] max-w-xs">Studio druku 3D – modelujemy, drukujemy, wykańczamy.</p>
-        <a href="#" class="inline-flex items-center gap-2 mt-5 text-[14px] hover:text-accent transition-colors">
+        <p class="text-white/60 text-[14px] leading-[1.6] max-w-xs">Studio druku 3D – modelujemy, drukujemy, skanujemy.</p>
+        <a href="https://www.instagram.com/hsz.design" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-5 text-[14px] hover:text-accent transition-colors">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
           @hsz.design
         </a>
@@ -817,8 +888,8 @@
         <div class="mono-label text-white/40 mb-5">Kontakt</div>
         <ul class="space-y-3 text-[14px]">
           <li><a href="mailto:hello@hsz.design" class="text-white/80 hover:text-accent transition-colors">hello@hsz.design</a></li>
-          <li><a href="tel:+48000000000"        class="text-white/80 hover:text-white transition-colors font-mono">+48 ___ ___ ___</a></li>
-          <li class="text-white/60">Polska</li>
+          <li><a href="tel:+48575432581"        class="text-white/80 hover:text-white transition-colors font-mono">+48 575 432 581</a></li>
+          <li class="text-white/60">Kraków, Polska</li>
         </ul>
       </div>
 
@@ -843,6 +914,20 @@
 </main>
 
 <script>
+  // ---------- Dark mode toggle ----------
+  const rootEl = document.documentElement;
+  const themeButtons = [document.getElementById('themeToggle'), document.getElementById('themeToggleMobile')].filter(Boolean);
+  function setTheme(theme) {
+    rootEl.classList.toggle('dark', theme === 'dark');
+    themeButtons.forEach(b => b.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false'));
+    try { localStorage.setItem('hsz-theme', theme); } catch (_) {}
+  }
+  themeButtons.forEach(b => b.addEventListener('click', () => {
+    setTheme(rootEl.classList.contains('dark') ? 'light' : 'dark');
+  }));
+  // sync aria-pressed with the state the inline head script already applied
+  setTheme(rootEl.classList.contains('dark') ? 'dark' : 'light');
+
   // ---------- Mobile menu ----------
   const menuBtn = document.getElementById('menuBtn');
   const mobileMenu = document.getElementById('mobileMenu');
@@ -951,7 +1036,7 @@
       });
       const data = await resp.json();
       if (data && data.ok === false) throw new Error(data.error || 'Błąd serwera');
-      status.textContent = '✓ Dzięki! Wracamy z wyceną w ciągu 24h.';
+      status.textContent = '✓ Dzięki! Wracamy z wyceną w ciągu 48h.';
       status.classList.remove('hidden', 'text-muted', 'text-red-500');
       status.classList.add('text-accent', 'font-medium');
       form.reset();
@@ -989,7 +1074,7 @@
       grid.innerHTML = data.slice(0, 6).map(r => {
         const src = driveImgSrc(r.cover);
         const meta = [r.material, r.dimensions].filter(Boolean).join(' · ');
-        return `<article class="project-card block aspect-square rounded-xl bg-ink reveal is-in">
+        return `<article class="project-card block aspect-square rounded-xl bg-[#0A0A0A] reveal is-in">
           ${src ? `<img src="${esc(src)}" alt="${esc(r.title)}" loading="lazy" class="w-full h-full object-cover" referrerpolicy="no-referrer"/>` : ''}
           <div class="project-overlay">
             ${meta ? `<div class="mono-label text-white/70 mb-1">${esc(meta)}</div>` : ''}
