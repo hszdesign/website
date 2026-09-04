@@ -1054,11 +1054,12 @@
   });
 
   // ---------- Realizacje z GAS ----------
+  // drive.google.com/uc?export=view bywa blokowane, gdy jest ładowane jako <img>
+  // z obcej domeny (curl to widzi, przeglądarka dostaje onerror) — lh3.googleusercontent.com
+  // to publiczny CDN Google do osadzania obrazów, działa niezawodnie.
   function driveImgSrc(url) {
-    if (!url) return '';
-    const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (m) return 'https://drive.google.com/uc?export=view&id=' + m[1];
-    return url;
+    const id = driveFileId(url);
+    return id ? 'https://lh3.googleusercontent.com/d/' + id + '=w1000' : (url || '');
   }
   function driveFileId(url) {
     if (!url) return '';

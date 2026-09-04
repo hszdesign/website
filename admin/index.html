@@ -280,7 +280,7 @@
                     title="Przesuń niżej" :disabled="idx===realizacje.length-1 || reordering" @click="moveRealizacja(idx, 1)">▼</button>
           </div>
           <div class="w-12 h-12 bg-bg clip-hex overflow-hidden flex-shrink-0 grid place-items-center">
-            <template x-if="r.cover"><img :src="r.cover" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer"/></template>
+            <template x-if="r.cover"><img :src="driveImgSrc(r.cover)" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer"/></template>
             <template x-if="!r.cover"><span class="text-muted text-[10px] font-mono">—</span></template>
           </div>
           <div class="min-w-0 flex-1">
@@ -310,6 +310,14 @@
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwKBFHNnHbB5l58j_tyegRopRRJNc42Sye-3_FGuv4AiJmJz6L1azVYO1cWU0xvJAzy2g/exec';
 const GOOGLE_CLIENT_ID = '380920795841-6qnv15r9ga4iu9ca3msk4ejl89vlblih.apps.googleusercontent.com';
 // =======================================================================
+
+// drive.google.com/file/.../view nie jest bezpośrednim linkiem do obrazu — do miniaturek
+// używamy publicznego CDN lh3.googleusercontent.com, które faktycznie serwuje piksele.
+function driveImgSrc(url) {
+  if (!url) return '';
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return m ? 'https://lh3.googleusercontent.com/d/' + m[1] + '=w200' : url;
+}
 
 function admin() {
   return {
