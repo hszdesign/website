@@ -1070,9 +1070,10 @@
     const id = driveFileId(url);
     return id ? 'https://drive.google.com/file/d/' + id + '/preview' : (url || '');
   }
-  // Proporcje kontenera wideo — ustawiane ręcznie w panelu admina (pole "Orientacja wideo"),
-  // bo Google blokuje ładowanie miniaturki Drive z poziomu przeglądarki (działa tylko w curl/serwerze).
-  const VIDEO_ASPECT_CLASS = { landscape: 'aspect-video', portrait: 'aspect-[9/16]', square: 'aspect-square' };
+  // Proporcje kontenera — ustawiane ręcznie w panelu admina (pola "Orientacja wideo"/"Orientacja zdjęcia"),
+  // bo Google blokuje ładowanie miniaturki Drive z poziomu przeglądarki (działa tylko w curl/serwerze),
+  // więc nie da się automatycznie wykryć prawdziwego kształtu pliku.
+  const ASPECT_CLASS = { landscape: 'aspect-video', portrait: 'aspect-[9/16]', square: 'aspect-square' };
   function esc(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -1095,7 +1096,9 @@
         const media = videoSrc
           ? `<iframe src="${esc(videoSrc)}" title="${esc(r.title)}" loading="lazy" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>`
           : (src ? `<img src="${esc(src)}" alt="${esc(r.title)}" loading="lazy" class="w-full h-full object-cover" referrerpolicy="no-referrer"/>` : '');
-        const shapeClass = videoSrc ? (VIDEO_ASPECT_CLASS[r.video_orientation] || VIDEO_ASPECT_CLASS.landscape) : 'aspect-square';
+        const shapeClass = videoSrc
+          ? (ASPECT_CLASS[r.video_orientation] || ASPECT_CLASS.landscape)
+          : (ASPECT_CLASS[r.photo_orientation] || ASPECT_CLASS.square);
         return `<article class="project-card block ${shapeClass} rounded-xl bg-[#0A0A0A] reveal is-in relative">
           ${media}
           <div class="project-overlay${videoSrc ? ' is-video' : ''}">

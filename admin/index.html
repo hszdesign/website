@@ -238,6 +238,15 @@
             <p x-show="editingRealizacja.photos.length===0" class="text-muted text-[13px]">Brak zdjęć — kliknij „Dodaj zdjęcie".</p>
           </div>
         </div>
+        <label class="sm:col-span-2" x-show="editingRealizacja.photos.length>0">
+          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Orientacja zdjęcia (miniatury)</span>
+          <select class="field" x-model="editingRealizacja.photo_orientation">
+            <option value="square">Kwadratowe (1:1)</option>
+            <option value="landscape">Poziome (16:9)</option>
+            <option value="portrait">Pionowe (9:16, np. z telefonu)</option>
+          </select>
+          <p class="text-[12px] text-muted mt-1">Dopasowuje kształt karty na stronie do kształtu pierwszego zdjęcia, żeby nie ucinało ważnych fragmentów.</p>
+        </label>
         <label class="sm:col-span-2">
           <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Wideo (link Google Drive, opcjonalnie)</span>
           <input class="field" placeholder="https://drive.google.com/file/d/..." x-model="editingRealizacja.video"/>
@@ -421,7 +430,7 @@ function admin() {
 
     newRealizacja() {
       const maxOrder = this.realizacje.reduce((m, r) => Math.max(m, r.order || 0), -1);
-      this.editingRealizacja = { title:'', slug:'', description:'', material:'', dimensions:'', photos:[], video:'', video_orientation:'landscape', status:'draft', order: maxOrder + 1 };
+      this.editingRealizacja = { title:'', slug:'', description:'', material:'', dimensions:'', photos:[], photo_orientation:'square', video:'', video_orientation:'landscape', status:'draft', order: maxOrder + 1 };
     },
 
     editRealizacja(r) {
@@ -429,6 +438,7 @@ function admin() {
       if (!Array.isArray(this.editingRealizacja.photos)) this.editingRealizacja.photos = [];
       if (typeof this.editingRealizacja.video !== 'string') this.editingRealizacja.video = '';
       if (!['landscape','portrait','square'].includes(this.editingRealizacja.video_orientation)) this.editingRealizacja.video_orientation = 'landscape';
+      if (!['landscape','portrait','square'].includes(this.editingRealizacja.photo_orientation)) this.editingRealizacja.photo_orientation = 'square';
     },
 
     async saveRealizacja() {
