@@ -119,6 +119,21 @@
   /* Disable selection on nav */
   nav button, nav a { -webkit-tap-highlight-color: transparent; }
 
+  /* Realizacje carousel — fixed height, width follows each card's own aspect-ratio */
+  .realizacje-carousel {
+    scroll-snap-type: x proximity;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .realizacje-carousel::-webkit-scrollbar { display: none; }
+  .realizacje-slide {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    height: 300px;
+  }
+  @media (min-width: 768px) { .realizacje-slide { height: 380px; } }
+
   /* Project card hover */
   .project-card {
     overflow: hidden;
@@ -548,31 +563,32 @@
 </section>
 
 <!-- ============================ 02 – REALIZACJE ============================ -->
-<section id="realizacje" class="py-24 md:py-32 bg-surface border-y border-border">
+<section id="realizacje" class="py-24 md:py-32 bg-surface border-y border-border overflow-hidden">
   <div class="max-w-7xl mx-auto px-5 md:px-8">
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14 md:mb-20 reveal">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-12 reveal">
       <div>
         <div class="section-eyebrow mb-4">Realizacje</div>
         <h2 class="font-display font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em]">Wybrane projekty</h2>
       </div>
-      <p class="text-muted text-[16px] md:max-w-sm">Przekrój wybranych zleceń – od jednostek dla klientów indywidualnych po małe serie dla firm.</p>
+      <div class="flex items-center gap-4">
+        <p class="text-muted text-[16px] md:max-w-sm">Przekrój wybranych zleceń – od jednostek dla klientów indywidualnych po małe serie dla firm.</p>
+        <div class="hidden md:flex items-center gap-2 flex-shrink-0">
+          <button id="realizacje-prev" type="button" class="w-11 h-11 rounded-full border border-border flex items-center justify-center text-ink hover:bg-bg transition-colors disabled:opacity-30 disabled:pointer-events-none" aria-label="Poprzednie realizacje">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 5l-7 7 7 7"/></svg>
+          </button>
+          <button id="realizacje-next" type="button" class="w-11 h-11 rounded-full border border-border flex items-center justify-center text-ink hover:bg-bg transition-colors disabled:opacity-30 disabled:pointer-events-none" aria-label="Następne realizacje">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div id="realizacje-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+    <div id="realizacje-grid" class="realizacje-carousel flex gap-4 md:gap-5 overflow-x-auto -mx-5 px-5 md:mx-0 md:px-0">
       <!-- skeleton – zastąpione przez JS po załadowaniu -->
-      <div class="aspect-square rounded-xl bg-border animate-pulse reveal is-in"></div>
-      <div class="aspect-square rounded-xl bg-border animate-pulse reveal is-in"></div>
-      <div class="aspect-square rounded-xl bg-border animate-pulse reveal is-in"></div>
-      <div class="aspect-square rounded-xl bg-border animate-pulse reveal is-in"></div>
-      <div class="aspect-square rounded-xl bg-border animate-pulse reveal is-in"></div>
-      <div class="aspect-square rounded-xl bg-border animate-pulse reveal is-in"></div>
-    </div>
-
-    <div id="realizacje-more" class="mt-12 md:mt-14 text-center hidden">
-      <a href="https://www.instagram.com/hsz.design" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-accent hover:text-accent-dark font-medium">
-        Więcej na Instagramie
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
-      </a>
+      <div class="realizacje-slide aspect-square rounded-xl bg-border animate-pulse reveal is-in"></div>
+      <div class="realizacje-slide aspect-square rounded-xl bg-border animate-pulse reveal is-in"></div>
+      <div class="realizacje-slide aspect-square rounded-xl bg-border animate-pulse reveal is-in"></div>
+      <div class="realizacje-slide aspect-video rounded-xl bg-border animate-pulse reveal is-in"></div>
     </div>
   </div>
 </section>
@@ -1077,6 +1093,13 @@
   function esc(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+  const IG_CARD = `<a href="https://www.instagram.com/hsz.design" target="_blank" rel="noopener"
+      class="realizacje-slide aspect-square rounded-xl border border-border bg-bg flex flex-col items-center justify-center gap-3 text-center px-6 flex-shrink-0 reveal is-in hover:bg-surface transition-colors">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="text-ink"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+    <span class="font-display font-bold text-[16px] text-ink">Więcej na Instagramie</span>
+    <span class="mono-label text-muted">@hsz.design</span>
+  </a>`;
+
   async function loadRealizacje() {
     const grid = document.getElementById('realizacje-grid');
     if (!grid) return;
@@ -1085,10 +1108,10 @@
       if (!res.ok) throw new Error('http ' + res.status);
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) {
-        grid.innerHTML = '<p class="col-span-full text-center text-muted py-16 text-[15px] font-display">Realizacje wkrótce.</p>';
+        grid.innerHTML = '<p class="w-full text-center text-muted py-16 text-[15px] font-display">Realizacje wkrótce.</p>';
         return;
       }
-      grid.innerHTML = data.slice(0, 6).map(r => {
+      grid.innerHTML = data.map(r => {
         const src = driveImgSrc(r.cover);
         const videoId = driveFileId(r.video);
         const videoSrc = videoId ? driveVideoEmbed(r.video) : '';
@@ -1099,20 +1122,45 @@
         const shapeClass = videoSrc
           ? (ASPECT_CLASS[r.video_orientation] || ASPECT_CLASS.landscape)
           : (ASPECT_CLASS[r.photo_orientation] || ASPECT_CLASS.square);
-        return `<article class="project-card block ${shapeClass} rounded-xl bg-[#0A0A0A] reveal is-in relative">
+        return `<article class="realizacje-slide project-card block ${shapeClass} rounded-xl bg-[#0A0A0A] reveal is-in relative">
           ${media}
           <div class="project-overlay${videoSrc ? ' is-video' : ''}">
             ${meta ? `<div class="mono-label text-white/70 mb-1">${esc(meta)}</div>` : ''}
             <div class="font-display font-bold text-white text-[20px]">${esc(r.title)}</div>
           </div>
         </article>`;
-      }).join('');
-      if (data.length > 6) document.getElementById('realizacje-more')?.classList.remove('hidden');
+      }).join('') + IG_CARD;
     } catch (_) {
-      grid.innerHTML = '<p class="col-span-full text-center text-muted py-16 text-[15px] font-display">Realizacje wkrótce.</p>';
+      grid.innerHTML = '<p class="w-full text-center text-muted py-16 text-[15px] font-display">Realizacje wkrótce.</p>';
     }
   }
   loadRealizacje();
+
+  // ---------- Realizacje carousel controls ----------
+  (function () {
+    const track = document.getElementById('realizacje-grid');
+    const prevBtn = document.getElementById('realizacje-prev');
+    const nextBtn = document.getElementById('realizacje-next');
+    if (!track || !prevBtn || !nextBtn) return;
+
+    function scrollByCard(dir) {
+      const first = track.querySelector('.realizacje-slide');
+      const amount = first ? first.getBoundingClientRect().width + 20 : track.clientWidth * 0.8;
+      track.scrollBy({ left: dir * amount, behavior: 'smooth' });
+    }
+    prevBtn.addEventListener('click', () => scrollByCard(-1));
+    nextBtn.addEventListener('click', () => scrollByCard(1));
+
+    function updateArrows() {
+      const max = track.scrollWidth - track.clientWidth - 2;
+      prevBtn.disabled = track.scrollLeft <= 2;
+      nextBtn.disabled = track.scrollLeft >= max;
+    }
+    track.addEventListener('scroll', updateArrows, { passive: true });
+    new ResizeObserver(updateArrows).observe(track);
+    new MutationObserver(updateArrows).observe(track, { childList: true }); // po doładowaniu realizacji z GAS
+    updateArrows();
+  })();
 
   // ---------- Reveal on scroll ----------
   const io = new IntersectionObserver(entries => {
