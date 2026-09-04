@@ -1093,7 +1093,7 @@
         const videoSrc = videoId ? driveVideoEmbed(r.video) : '';
         const meta = [r.material, r.dimensions].filter(Boolean).join(' · ');
         const media = videoSrc
-          ? `<iframe src="${esc(videoSrc)}" title="${esc(r.title)}" loading="lazy" class="absolute inset-0 w-full h-full border-0"></iframe>`
+          ? `<iframe src="${esc(videoSrc)}" title="${esc(r.title)}" loading="lazy" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>`
           : (src ? `<img src="${esc(src)}" alt="${esc(r.title)}" loading="lazy" class="w-full h-full object-cover" referrerpolicy="no-referrer"/>` : '');
         const shapeClass = videoSrc ? (VIDEO_ASPECT_CLASS[r.video_orientation] || VIDEO_ASPECT_CLASS.landscape) : 'aspect-square';
         return `<article class="project-card block ${shapeClass} rounded-xl bg-[#0A0A0A] reveal is-in relative">
