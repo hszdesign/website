@@ -243,6 +243,15 @@
           <input class="field" placeholder="https://drive.google.com/file/d/..." x-model="editingRealizacja.video"/>
           <p class="text-[12px] text-muted mt-1">Ten sam sposób udostępniania co zdjęcia (<i>Anyone with the link</i>). Jeśli ustawione, karta realizacji na stronie pokaże odtwarzacz wideo zamiast zdjęcia.</p>
         </label>
+        <label class="sm:col-span-2" x-show="editingRealizacja.video">
+          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Orientacja wideo</span>
+          <select class="field" x-model="editingRealizacja.video_orientation">
+            <option value="landscape">Poziome (16:9)</option>
+            <option value="portrait">Pionowe (9:16, np. z telefonu)</option>
+            <option value="square">Kwadratowe (1:1)</option>
+          </select>
+          <p class="text-[12px] text-muted mt-1">Dopasowuje kształt karty na stronie do kształtu Twojego filmu, żeby odtwarzacz nie ucinał obrazu.</p>
+        </label>
         <div class="sm:col-span-2 flex items-center justify-between pt-3 border-t border-border">
           <template x-if="editingRealizacja.id">
             <button type="button" class="btn-danger" @click="deleteRealizacja()">Usuń</button>
@@ -262,8 +271,14 @@
       <template x-if="realizacje.length === 0 && !loading.realizacje">
         <p class="text-muted text-[14px] p-8 text-center">Brak realizacji. Dodaj pierwszą.</p>
       </template>
-      <template x-for="r in realizacje" :key="r.id">
+      <template x-for="(r, idx) in realizacje" :key="r.id">
         <article class="border-b border-border last:border-b-0 px-5 py-4 flex items-center gap-4 hover:bg-bg transition">
+          <div class="flex flex-col flex-shrink-0">
+            <button type="button" class="w-6 h-6 grid place-items-center text-muted hover:text-ink disabled:opacity-25 disabled:pointer-events-none"
+                    title="Przesuń wyżej" :disabled="idx===0 || reordering" @click="moveRealizacja(idx, -1)">▲</button>
+            <button type="button" class="w-6 h-6 grid place-items-center text-muted hover:text-ink disabled:opacity-25 disabled:pointer-events-none"
+                    title="Przesuń niżej" :disabled="idx===realizacje.length-1 || reordering" @click="moveRealizacja(idx, 1)">▼</button>
+          </div>
           <div class="w-12 h-12 bg-bg clip-hex overflow-hidden flex-shrink-0 grid place-items-center">
             <template x-if="r.cover"><img :src="r.cover" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer"/></template>
             <template x-if="!r.cover"><span class="text-muted text-[10px] font-mono">—</span></template>
@@ -309,6 +324,7 @@ function admin() {
     editingRealizacja: null,
     loading: { briefy: false, realizacje: false },
     saving: false,
+    reordering: false,
     toast: { msg: '', type: 'ok' },
 
     get tabs() {
@@ -396,13 +412,15 @@ function admin() {
     },
 
     newRealizacja() {
-      this.editingRealizacja = { title:'', slug:'', description:'', material:'', dimensions:'', photos:[], video:'', status:'draft' };
+      const maxOrder = this.realizacje.reduce((m, r) => Math.max(m, r.order || 0), -1);
+      this.editingRealizacja = { title:'', slug:'', description:'', material:'', dimensions:'', photos:[], video:'', video_orientation:'landscape', status:'draft', order: maxOrder + 1 };
     },
 
     editRealizacja(r) {
       this.editingRealizacja = JSON.parse(JSON.stringify(r));
       if (!Array.isArray(this.editingRealizacja.photos)) this.editingRealizacja.photos = [];
       if (typeof this.editingRealizacja.video !== 'string') this.editingRealizacja.video = '';
+      if (!['landscape','portrait','square'].includes(this.editingRealizacja.video_orientation)) this.editingRealizacja.video_orientation = 'landscape';
     },
 
     async saveRealizacja() {
@@ -417,6 +435,27 @@ function admin() {
         await this.loadRealizacje();
       } catch (e) { this.error(e); }
       finally { this.saving = false; }
+    },
+
+    async moveRealizacja(idx, dir) {
+      const other = idx + dir;
+      if (other < 0 || other >= this.realizacje.length) return;
+      const a = this.realizacje[idx];
+      const b = this.realizacje[other];
+      // Jeśli oba mają tę samą (albo brakującą) kolejność, nadaj im wyraźne wartości
+      // zamiast tylko zamieniać identyczne zera — inaczej przesunięcie nic by nie dało.
+      let orderA = a.order || 0;
+      let orderB = b.order || 0;
+      if (orderA === orderB) { orderA = idx; orderB = other; }
+      this.reordering = true;
+      try {
+        await Promise.all([
+          this.api('save_realizacja', { realizacja: { ...a, order: orderB } }),
+          this.api('save_realizacja', { realizacja: { ...b, order: orderA } }),
+        ]);
+        await this.loadRealizacje();
+      } catch (e) { this.error(e); }
+      finally { this.reordering = false; }
     },
 
     async deleteRealizacja() {

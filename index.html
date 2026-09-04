@@ -1060,12 +1060,18 @@
     if (m) return 'https://drive.google.com/uc?export=view&id=' + m[1];
     return url;
   }
-  function driveVideoEmbed(url) {
+  function driveFileId(url) {
     if (!url) return '';
     const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (m) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
-    return url;
+    return m ? m[1] : '';
   }
+  function driveVideoEmbed(url) {
+    const id = driveFileId(url);
+    return id ? 'https://drive.google.com/file/d/' + id + '/preview' : (url || '');
+  }
+  // Proporcje kontenera wideo — ustawiane ręcznie w panelu admina (pole "Orientacja wideo"),
+  // bo Google blokuje ładowanie miniaturki Drive z poziomu przeglądarki (działa tylko w curl/serwerze).
+  const VIDEO_ASPECT_CLASS = { landscape: 'aspect-video', portrait: 'aspect-[9/16]', square: 'aspect-square' };
   function esc(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -1082,12 +1088,13 @@
       }
       grid.innerHTML = data.slice(0, 6).map(r => {
         const src = driveImgSrc(r.cover);
-        const videoSrc = driveVideoEmbed(r.video);
+        const videoId = driveFileId(r.video);
+        const videoSrc = videoId ? driveVideoEmbed(r.video) : '';
         const meta = [r.material, r.dimensions].filter(Boolean).join(' · ');
         const media = videoSrc
           ? `<iframe src="${esc(videoSrc)}" title="${esc(r.title)}" loading="lazy" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>`
           : (src ? `<img src="${esc(src)}" alt="${esc(r.title)}" loading="lazy" class="w-full h-full object-cover" referrerpolicy="no-referrer"/>` : '');
-        const shapeClass = videoSrc ? 'aspect-video' : 'aspect-square';
+        const shapeClass = videoSrc ? (VIDEO_ASPECT_CLASS[r.video_orientation] || VIDEO_ASPECT_CLASS.landscape) : 'aspect-square';
         return `<article class="project-card block ${shapeClass} rounded-xl bg-[#0A0A0A] reveal is-in relative">
           ${media}
           <div class="project-overlay${videoSrc ? ' is-video' : ''}">
