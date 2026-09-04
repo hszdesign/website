@@ -281,31 +281,6 @@
     </div>
   </section>
 
-  <!-- ============================== TAB: TEKSTY ============================== -->
-  <section x-show="tab==='content'" x-cloak>
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-      <h2 class="font-display text-2xl font-bold">Teksty na stronie</h2>
-      <button class="btn-primary" @click="saveContent()" :disabled="saving">
-        <span x-text="saving ? '…' : 'Zapisz wszystko'"></span>
-      </button>
-    </div>
-    <div class="bg-surface border border-border rounded-xl p-5 space-y-5">
-      <template x-for="(_, key) in content" :key="key">
-        <label class="block">
-          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1" x-text="key"></span>
-          <textarea class="field" rows="2" x-model="content[key]"></textarea>
-        </label>
-      </template>
-      <div class="pt-4 border-t border-border">
-        <div class="flex gap-2">
-          <input class="field flex-1" placeholder="nowy_klucz" x-model="newContentKey"/>
-          <input class="field flex-[2]" placeholder="wartość" x-model="newContentValue"/>
-          <button type="button" class="btn-ghost" @click="addContentKey()">+ Dodaj</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- Toast -->
   <div x-show="toast.msg" x-cloak x-transition
        class="fixed bottom-6 right-6 bg-ink text-white px-5 py-3 rounded-xl shadow-lg text-[14px] font-medium z-50"
@@ -332,10 +307,7 @@ function admin() {
     briefFilter: '',
     realizacje: [],
     editingRealizacja: null,
-    content: {},
-    newContentKey: '',
-    newContentValue: '',
-    loading: { briefy: false, realizacje: false, content: false },
+    loading: { briefy: false, realizacje: false },
     saving: false,
     toast: { msg: '', type: 'ok' },
 
@@ -343,7 +315,6 @@ function admin() {
       return [
         { key: 'briefy',     label: 'Briefy',     badge: this.briefy.filter(b => (b.status||'nowy') === 'nowy').length || '' },
         { key: 'realizacje', label: 'Realizacje', badge: this.realizacje.length || '' },
-        { key: 'content',    label: 'Teksty',     badge: '' },
       ];
     },
 
@@ -396,7 +367,7 @@ function admin() {
     },
 
     async loadAll() {
-      await Promise.all([this.loadBriefy(), this.loadRealizacje(), this.loadContent()]);
+      await Promise.all([this.loadBriefy(), this.loadRealizacje()]);
     },
 
     async loadBriefy() {
@@ -456,35 +427,6 @@ function admin() {
         this.ok('Usunięto');
         this.editingRealizacja = null;
         await this.loadRealizacje();
-      } catch (e) { this.error(e); }
-      finally { this.saving = false; }
-    },
-
-    async loadContent() {
-      this.loading.content = true;
-      try { this.content = await this.api('get_content_admin', {}) || {}; }
-      catch (_) {
-        // fallback przez publiczny endpoint GET
-        try {
-          const res = await fetch(GAS_URL + '?action=get_content');
-          this.content = await res.json();
-        } catch (e) { this.error(e); }
-      }
-      finally { this.loading.content = false; }
-    },
-
-    addContentKey() {
-      const k = (this.newContentKey || '').trim();
-      if (!k) return;
-      this.content[k] = this.newContentValue || '';
-      this.newContentKey = ''; this.newContentValue = '';
-    },
-
-    async saveContent() {
-      this.saving = true;
-      try {
-        await this.api('save_content', { updates: this.content });
-        this.ok('Teksty zapisane');
       } catch (e) { this.error(e); }
       finally { this.saving = false; }
     },
