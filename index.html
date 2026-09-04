@@ -135,6 +135,7 @@
     transition: opacity .35s ease;
     display: flex; flex-direction: column; justify-content: flex-end;
     padding: 1.25rem 1.25rem 1.1rem;
+    pointer-events: none; /* caption only — let clicks reach the iframe/img underneath */
   }
   .project-card:hover .project-overlay,
   .project-card:focus-within .project-overlay { opacity: 1; }
