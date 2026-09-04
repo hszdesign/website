@@ -238,6 +238,11 @@
             <p x-show="editingRealizacja.photos.length===0" class="text-muted text-[13px]">Brak zdjęć — kliknij „Dodaj zdjęcie".</p>
           </div>
         </div>
+        <label class="sm:col-span-2">
+          <span class="text-[12px] font-mono uppercase tracking-wider text-muted block mb-1">Wideo (link Google Drive, opcjonalnie)</span>
+          <input class="field" placeholder="https://drive.google.com/file/d/..." x-model="editingRealizacja.video"/>
+          <p class="text-[12px] text-muted mt-1">Ten sam sposób udostępniania co zdjęcia (<i>Anyone with the link</i>). Jeśli ustawione, karta realizacji na stronie pokaże odtwarzacz wideo zamiast zdjęcia.</p>
+        </label>
         <div class="sm:col-span-2 flex items-center justify-between pt-3 border-t border-border">
           <template x-if="editingRealizacja.id">
             <button type="button" class="btn-danger" @click="deleteRealizacja()">Usuń</button>
@@ -268,7 +273,7 @@
               <span class="font-medium text-[15px]" x-text="r.title"></span>
               <span :class="'pill-'+(r.status||'draft')" x-text="r.status||'draft'"></span>
             </div>
-            <p class="text-[12px] text-muted font-mono" x-text="r.slug + ' · ' + (r.photos?.length||0) + ' zdj.'"></p>
+            <p class="text-[12px] text-muted font-mono" x-text="r.slug + ' · ' + (r.photos?.length||0) + ' zdj.' + (r.video ? ' · wideo' : '')"></p>
           </div>
           <button class="btn-ghost" @click="editRealizacja(r)">Edytuj</button>
         </article>
@@ -420,17 +425,19 @@ function admin() {
     },
 
     newRealizacja() {
-      this.editingRealizacja = { title:'', slug:'', description:'', material:'', dimensions:'', photos:[], status:'draft' };
+      this.editingRealizacja = { title:'', slug:'', description:'', material:'', dimensions:'', photos:[], video:'', status:'draft' };
     },
 
     editRealizacja(r) {
       this.editingRealizacja = JSON.parse(JSON.stringify(r));
       if (!Array.isArray(this.editingRealizacja.photos)) this.editingRealizacja.photos = [];
+      if (typeof this.editingRealizacja.video !== 'string') this.editingRealizacja.video = '';
     },
 
     async saveRealizacja() {
       const r = this.editingRealizacja;
       r.photos = r.photos.map(p => (p||'').trim()).filter(Boolean);
+      r.video = (r.video || '').trim();
       this.saving = true;
       try {
         await this.api('save_realizacja', { realizacja: r });

@@ -138,6 +138,8 @@
   }
   .project-card:hover .project-overlay,
   .project-card:focus-within .project-overlay { opacity: 1; }
+  /* Video cards: overlay caption stays visible (no hover state on an iframe) */
+  .project-overlay.is-video { opacity: 1; background: linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,.85) 100%); }
 
   /* Stepper connectors */
   .step-arrow svg { display: block; }
@@ -1057,6 +1059,12 @@
     if (m) return 'https://drive.google.com/uc?export=view&id=' + m[1];
     return url;
   }
+  function driveVideoEmbed(url) {
+    if (!url) return '';
+    const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
+    return url;
+  }
   function esc(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -1073,10 +1081,14 @@
       }
       grid.innerHTML = data.slice(0, 6).map(r => {
         const src = driveImgSrc(r.cover);
+        const videoSrc = driveVideoEmbed(r.video);
         const meta = [r.material, r.dimensions].filter(Boolean).join(' · ');
-        return `<article class="project-card block aspect-square rounded-xl bg-[#0A0A0A] reveal is-in">
-          ${src ? `<img src="${esc(src)}" alt="${esc(r.title)}" loading="lazy" class="w-full h-full object-cover" referrerpolicy="no-referrer"/>` : ''}
-          <div class="project-overlay">
+        const media = videoSrc
+          ? `<iframe src="${esc(videoSrc)}" title="${esc(r.title)}" loading="lazy" class="absolute inset-0 w-full h-full border-0" allow="autoplay" allowfullscreen></iframe>`
+          : (src ? `<img src="${esc(src)}" alt="${esc(r.title)}" loading="lazy" class="w-full h-full object-cover" referrerpolicy="no-referrer"/>` : '');
+        return `<article class="project-card block aspect-square rounded-xl bg-[#0A0A0A] reveal is-in relative">
+          ${media}
+          <div class="project-overlay${videoSrc ? ' is-video' : ''}">
             ${meta ? `<div class="mono-label text-white/70 mb-1">${esc(meta)}</div>` : ''}
             <div class="font-display font-bold text-white text-[20px]">${esc(r.title)}</div>
           </div>
