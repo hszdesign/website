@@ -1084,9 +1084,10 @@
         const videoSrc = driveVideoEmbed(r.video);
         const meta = [r.material, r.dimensions].filter(Boolean).join(' · ');
         const media = videoSrc
-          ? `<iframe src="${esc(videoSrc)}" title="${esc(r.title)}" loading="lazy" class="absolute inset-0 w-full h-full border-0" allow="autoplay" allowfullscreen></iframe>`
+          ? `<iframe src="${esc(videoSrc)}" title="${esc(r.title)}" loading="lazy" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>`
           : (src ? `<img src="${esc(src)}" alt="${esc(r.title)}" loading="lazy" class="w-full h-full object-cover" referrerpolicy="no-referrer"/>` : '');
-        return `<article class="project-card block aspect-square rounded-xl bg-[#0A0A0A] reveal is-in relative">
+        const shapeClass = videoSrc ? 'aspect-video' : 'aspect-square';
+        return `<article class="project-card block ${shapeClass} rounded-xl bg-[#0A0A0A] reveal is-in relative">
           ${media}
           <div class="project-overlay${videoSrc ? ' is-video' : ''}">
             ${meta ? `<div class="mono-label text-white/70 mb-1">${esc(meta)}</div>` : ''}
